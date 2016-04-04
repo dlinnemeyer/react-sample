@@ -6,8 +6,12 @@ import {Provider} from 'react-redux';
 import remote from './remote_middleware/remote.js';
 import reducer from './reducers/reducer';
 import {AppContainer} from './components/App';
-import {VotingContainer} from './components/Voting';
-import {ResultsContainer} from './components/Results';
+// import {ItemsContainer} from './components/Items';
+import {ConsignorsContainer} from './components/Consignors';
+import {ConsignorContainer} from './components/Consignor';
+import {DashboardContainer} from './components/Dashboard';
+import {initialState} from './initialState.js';
+import {fromJS} from 'immutable'
 
 const createStoreWithMiddleware = compose(
   applyMiddleware(remote),
@@ -17,17 +21,13 @@ const createStoreWithMiddleware = compose(
 const store = createStoreWithMiddleware(reducer);
 store.dispatch({
   type: 'SET_STATE',
-  state: {
-    vote: {
-      pair: ['Sunshine', '28 Days Later'],
-      tally: {Sunshine: 2}
-    }
-  }
+  state: fromJS(initialState)
 });
 
 const routes = <Route component={AppContainer}>
-  <Route path="/results" component={ResultsContainer} />
-  <Route path="/" component={VotingContainer} />
+  <Route path="/" component={DashboardContainer} />
+  <Route path="/consignors" component={ConsignorsContainer} />
+  <Route path="/consignors/:consignorId" component={ConsignorContainer} />
 </Route>;
 
 ReactDOM.render(

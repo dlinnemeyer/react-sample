@@ -1,10 +1,13 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {Link} from 'react-router';
 
 export const App = React.createClass({
   render: function() {
     return <div id='wrapper'>
-      {React.cloneElement(this.props.children)}
+      <Link to='/consignors'>Consignors</Link>{" "}
+      <Link to='/items'>Items</Link>
+      {this.props.children}
       {this.props.loading ?
         <div id='loading'>loading...</div> :
         null}
