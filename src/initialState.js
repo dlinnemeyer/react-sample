@@ -39,7 +39,7 @@ export const initialState = {
       color: "black",
       size: "32",
       price: 15.99,
-      consignor: "2"
+      consignorid: "2"
     },
     "3": {
       id: "3",
@@ -48,7 +48,7 @@ export const initialState = {
       color: "blue",
       size: "L",
       price: 12.99,
-      consignor: "7"
+      consignorid: "7"
     },
     "5": {
       id: "5",
@@ -57,7 +57,7 @@ export const initialState = {
       color: "purple",
       size: "2",
       price: 23.99,
-      consignor: "2"
+      consignorid: "2"
     },
     "7": {
       id: "7",
@@ -66,7 +66,7 @@ export const initialState = {
       color: "red",
       size: "5",
       price: 8.99,
-      consignor: "2"
+      consignorid: "2"
     }
   }
 };

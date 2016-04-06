@@ -6,7 +6,8 @@ import {Provider} from 'react-redux';
 import remote from './remote_middleware/remote.js';
 import reducer from './reducers/reducer';
 import {AppContainer} from './components/App';
-// import {ItemsContainer} from './components/Items';
+import {ItemsContainer} from './components/Items';
+import {ItemContainer} from './components/Item';
 import {ConsignorsContainer} from './components/Consignors';
 import {ConsignorContainer} from './components/Consignor';
 import {DashboardContainer} from './components/Dashboard';
@@ -27,7 +28,9 @@ store.dispatch({
 const routes = <Route component={AppContainer}>
   <Route path="/" component={DashboardContainer} />
   <Route path="/consignors" component={ConsignorsContainer} />
-  <Route path="/consignors/:consignorId" component={ConsignorContainer} />
+  <Route path="/consignors/:consignorid" component={ConsignorContainer} />
+  <Route path="/items" component={ItemsContainer} />
+  <Route path="/items/:itemid" component={ItemContainer} />
 </Route>;
 
 ReactDOM.render(

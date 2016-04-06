@@ -4,7 +4,6 @@ import {Link} from 'react-router';
 
 export default React.createClass({
   render: function() {
-    console.log(this.props.items);
     return <div>
       {this.props.items.toList().map(item =>
         <div className="item" key={item.get("id")}>

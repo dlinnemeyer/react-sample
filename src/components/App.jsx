@@ -5,6 +5,7 @@ import {Link} from 'react-router';
 export const App = React.createClass({
   render: function() {
     return <div id='wrapper'>
+      <Link to='/'>Dashboard</Link>{" "}
       <Link to='/consignors'>Consignors</Link>{" "}
       <Link to='/items'>Items</Link>
       {this.props.children}
