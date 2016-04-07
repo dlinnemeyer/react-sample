@@ -11,6 +11,7 @@ import {ItemContainer} from './components/Item';
 import {ConsignorsContainer} from './components/Consignors';
 import {ConsignorContainer} from './components/Consignor';
 import {DashboardContainer} from './components/Dashboard';
+import {AddConsignorContainer} from './components/AddConsignor';
 import {initialState} from './initialState.js';
 import {fromJS} from 'immutable'
 
@@ -28,6 +29,7 @@ store.dispatch({
 const routes = <Route component={AppContainer}>
   <Route path="/" component={DashboardContainer} />
   <Route path="/consignors" component={ConsignorsContainer} />
+  <Route path="/consignors/new" component={AddConsignorContainer} />
   <Route path="/consignors/:consignorid" component={ConsignorContainer} />
   <Route path="/items" component={ItemsContainer} />
   <Route path="/items/:itemid" component={ItemContainer} />

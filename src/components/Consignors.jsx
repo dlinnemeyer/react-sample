@@ -2,11 +2,15 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ConsignorList from './ConsignorList'
+import {Link} from 'react-router';
 
 export const Consignors = React.createClass({
   mixins: [PureRenderMixin],
   render: function() {
-    return <ConsignorList consignors={this.props.consignors} />;
+    return <div>
+      <Link to="/consignors/new">Add Consignor</Link>
+      <ConsignorList consignors={this.props.consignors} />
+    </div>;
   }
 });
 
