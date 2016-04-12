@@ -1,28 +1,7 @@
- import {List,Map} from 'immutable';
+ import {fromJS, List,Map} from 'immutable';
 
 function setState(state, newState){
   return state.merge(newState);
-}
-
-function vote(state, entry){
-  const pair = state.getIn(['vote','pair']);
-  if(pair && pair.includes(entry)){
-    return state.set('hasVoted', entry);
-  }
-  else {
-    return state;
-  }
-}
-
-function resetVote(state) {
-  const hasVoted = state.get('hasVoted');
-  const currentPair = state.getIn(['vote', 'pair'], List());
-  if (hasVoted && !currentPair.includes(hasVoted)) {
-    return state.remove('hasVoted');
-  }
-  else {
-    return state;
-  }
 }
 
 function loading(state){
@@ -33,16 +12,20 @@ function loaded(state){
   return state.set('loading', false);
 }
 
+function addConsignor(state, consignor){
+  return state.set("consignors", state.get("consignors").set(consignor.id, fromJS(consignor)));
+}
+
 export default function(state = Map(), action) {
   if(action.loaded) state = loaded(state);
 
   switch (action.type) {
   case 'SET_STATE':
-    return resetVote(setState(state, action.state));
-  case 'VOTE':
-    return vote(state, action.entry);
+    return setState(state, action.state);
   case 'LOADING':
-    return loading(state, action.loading);
+    return loading(state);
+  case 'ADD_CONSIGNOR':
+    return addConsignor(state, action.consignor);
   }
   return state;
 }
