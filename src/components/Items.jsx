@@ -2,11 +2,15 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ItemList from './ItemList'
+import {Link} from 'react-router';
 
 export const Items = React.createClass({
   mixins: [PureRenderMixin],
   render: function() {
-    return <ItemList items={this.props.items} />;
+    return <div>
+      <Link to="/items/new">Add Item</Link>
+      <ItemList items ={this.props.items} />
+    </div>
   }
 });
 

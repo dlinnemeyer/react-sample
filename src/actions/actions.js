@@ -21,9 +21,17 @@ export function loading(){
 // for this?
 export function addConsignor(consignor){
   if(!consignor.items) consignor.items = [];
-  if(!consignor.id) consignor.id = Math.floor(Math.random() * 1000000);
+  if(!consignor.id) consignor.id = (Math.floor(Math.random() * 1000000)) + "";
   return {
     type: 'ADD_CONSIGNOR',
     consignor
+  }
+}
+
+export function addItem(item){
+  if(!item.id) item.id = (Math.floor(Math.random() * 1000000)) + "";
+  return {
+    type: 'ADD_ITEM',
+    item
   }
 }

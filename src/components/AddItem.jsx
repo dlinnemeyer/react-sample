@@ -1,11 +1,11 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
-import {displayName} from '../models/consignor';
-import AddConsignorForm from './AddConsignorForm'
-import {loading, addConsignor} from '../actions/actions.js'
+import {displayName} from '../models/item';
+import AddItemForm from './AddItemForm'
+import {loading, addItem} from '../actions/actions.js'
 
-export const AddConsignor = React.createClass({
+export const AddItem = React.createClass({
   mixins: [PureRenderMixin],
   contextTypes: {
     // this is a stupid way to make sure this.context.router is included.
@@ -16,25 +16,27 @@ export const AddConsignor = React.createClass({
   },
   onSubmit(data){
     // when we async-ify this, we'll want to navigate after the action propogates
-    this.props.addConsignor(data);
-    this.context.router.push('/consignors');
+    this.props.addItem(data);
+    this.context.router.push('/items');
   },
 
   render: function() {
     return <div>
-      <AddConsignorForm onSubmit={this.onSubmit} />
+      <AddItemForm onSubmit={this.onSubmit} {...this.props} />
     </div>;
   }
 });
 
 function mapStateToProps(state, props){
   return {
+    // we'll need to request all the consignors for this? or probably ideally an autocomplete?
+    consignors: state.get("consignors")
   }
 }
 
-export const AddConsignorContainer = connect(
+export const AddItemContainer = connect(
   mapStateToProps, {
-    addConsignor,
+    addItem,
     loading
   }
-)(AddConsignor);
+)(AddItem);

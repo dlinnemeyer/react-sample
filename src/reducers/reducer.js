@@ -16,6 +16,10 @@ function addConsignor(state, consignor){
   return state.set("consignors", state.get("consignors").set(consignor.id, fromJS(consignor)));
 }
 
+function addItem(state, item){
+  return state.set("items", state.get("items").set(item.id, fromJS(item)));
+}
+
 export default function(state = Map(), action) {
   if(action.loaded) state = loaded(state);
 
@@ -26,6 +30,12 @@ export default function(state = Map(), action) {
     return loading(state);
   case 'ADD_CONSIGNOR':
     return addConsignor(state, action.consignor);
+  case 'ADD_ITEM':
+    return addItem(state, action.item);
+  case '@@INIT':
+    return state;
+  default:
+    throw new Error("UNKNOWN ACTION: "+action.type);
   }
   return state;
 }

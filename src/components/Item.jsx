@@ -23,8 +23,6 @@ function mapStateToProps(state, props){
   // not as much of a pain if we go with a more formalized data-fetching layer with more
   // structured models? somewhere between this and ember?
   let item = state.get('items').get(props.params.itemid);
-  console.log(item.get("consignorid"), state.get('consignors').get(item.get("consignorid")));
-  console.log(state.get('consignors').get(item.get("consignorid") + ""));
   return {
     item: item,
     consignor: state.get('consignors').get(item.get("consignorid"))
