@@ -1,5 +1,8 @@
 export const initialState = {
   consignors: {},
   items: {},
-  loading: false
+  loading: {
+    addConsignor: false,
+    addItem: false
+  }
 };

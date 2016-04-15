@@ -3,7 +3,7 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {displayName} from '../models/consignor';
 import AddConsignorForm from './AddConsignorForm'
-import {loading, addConsignor} from '../actions/actions.js'
+import {addConsignor} from '../actions/actions.js'
 
 export const AddConsignor = React.createClass({
   mixins: [PureRenderMixin],
@@ -19,21 +19,23 @@ export const AddConsignor = React.createClass({
     this.props.addConsignor(data).then((consignor) => this.context.router.push('/consignors'));
   },
 
-  render: function() {
+  isLoading(){
+    return !!this.props.formLoading;
+  },
+
+  render(){
     return <div>
-      <AddConsignorForm onSubmit={this.onSubmit} />
+      <AddConsignorForm onSubmit={this.onSubmit} isLoading={this.isLoading()} />
     </div>;
   }
 });
 
 function mapStateToProps(state, props){
   return {
+    formLoading: state.getIn(["loading", "addConsignor"])
   }
 }
 
 export const AddConsignorContainer = connect(
-  mapStateToProps, {
-    addConsignor,
-    loading
-  }
+  mapStateToProps, {addConsignor}
 )(AddConsignor);

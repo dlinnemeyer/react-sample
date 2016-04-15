@@ -15,7 +15,7 @@ export default React.createClass({
   },
 
   render: function() {
-    return <form onSubmit={this.submitHandler} onChange={this.logSerialize} ref="form">
+    return <form onSubmit={this.submitHandler} ref="form">
       <p>
         <input type="text" defaultValue="" placeholder="First Name" name="firstName" ref="firstName" />
         <input type="text" defaultValue="" placeholder="Last Name" name="lastName" ref="lastName" />
@@ -38,6 +38,7 @@ export default React.createClass({
         <input type="text" defaultValue="" placeholder="Zip" name="zip" ref="zip" />
       </p>
       <p><input type="submit" value="Add Consignor" /></p>
+      {this.props.isLoading && <img src="/img/loading.gif" />}
     </form>;
   }
 });

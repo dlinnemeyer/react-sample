@@ -15,14 +15,17 @@ export const AddItem = React.createClass({
     router: React.PropTypes.object.isRequired
   },
   onSubmit(data){
-    // when we async-ify this, we'll want to navigate after the action propogates
-    this.props.addItem(data);
-    this.context.router.push('/items');
+    this.props.addItem(data).then((item) => this.context.router.push('/items'));
+  },
+
+  isLoading(){
+    return !!this.props.formLoading;
   },
 
   render: function() {
     return <div>
-      <AddItemForm onSubmit={this.onSubmit} {...this.props} />
+      <AddItemForm onSubmit={this.onSubmit} consignors={this.props.consignors}
+        isLoading={this.isLoading()} />
     </div>;
   }
 });
@@ -30,7 +33,8 @@ export const AddItem = React.createClass({
 function mapStateToProps(state, props){
   return {
     // we'll need to request all the consignors for this? or probably ideally an autocomplete?
-    consignors: state.get("consignors")
+    consignors: state.get("consignors"),
+    formLoading: state.getIn(["loading", "addItem"])
   }
 }
 

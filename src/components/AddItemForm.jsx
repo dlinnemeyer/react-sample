@@ -20,7 +20,7 @@ export default React.createClass({
   },
 
   render: function() {
-    return <form onSubmit={this.submitHandler} onChange={this.logSerialize} ref="form">
+    return <form onSubmit={this.submitHandler} ref="form">
       <p>
         <label>Consignor</label>
         <select name="consignorid" ref="consignorid">
@@ -47,6 +47,7 @@ export default React.createClass({
         $<input id="price" defaultValue="" placeholder="0.00" name="price" ref="price" />
       </p>
       <p><input type="submit" value="Add Consignor" /></p>
+      {this.props.isLoading && <img src="/img/loading.gif" />}
     </form>;
   }
 });
