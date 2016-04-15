@@ -16,8 +16,7 @@ export const AddConsignor = React.createClass({
   },
   onSubmit(data){
     // when we async-ify this, we'll want to navigate after the action propogates
-    this.props.addConsignor(data);
-    this.context.router.push('/consignors');
+    this.props.addConsignor(data).then((consignor) => this.context.router.push('/consignors'));
   },
 
   render: function() {

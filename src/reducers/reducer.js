@@ -17,7 +17,13 @@ function addConsignor(state, consignor){
 }
 
 function addItem(state, item){
-  return state.set("items", state.get("items").set(item.id, fromJS(item)));
+  let newState = state.set("items", state.get("items").set(item.id, fromJS(item)));
+  // this is only necessary because we're persisting to localstorage. if we're backed with a
+  // database, this wouldn't be here.
+  let consignor = state.get("consignors").get(item.consignorid);
+  consignor = consignor.set("items", consignor.get("items").push(item.id));
+  console.log(consignor.get("items"), item, item.id);
+  return newState.set("consignors", state.get("consignors").set(consignor.get("id"), consignor));
 }
 
 export default function(state = Map(), action) {
