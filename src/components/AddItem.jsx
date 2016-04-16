@@ -2,20 +2,14 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {displayName} from '../models/item';
-import AddItemForm from './AddItemForm'
-import {loading, addItem} from '../actions/actions.js'
+import AddItemForm from './AddItemForm';
+import {loading, addItem} from '../actions/actions.js';
+import {browserHistory} from 'react-router';
 
 export const AddItem = React.createClass({
   mixins: [PureRenderMixin],
-  contextTypes: {
-    // this is a stupid way to make sure this.context.router is included.
-    // we probably should just explicitly pass the prop in from index, or maybe use the
-    // BrowserHistory singleton? or better yet, react-router-redux has an action-based way of
-    // navigating
-    router: React.PropTypes.object.isRequired
-  },
   onSubmit(data){
-    this.props.addItem(data).then((item) => this.context.router.push('/items'));
+    this.props.addItem(data).then((item) => browserHistory.push('/items'));
   },
 
   isLoading(){

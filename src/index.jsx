@@ -5,26 +5,27 @@ import {createStore, applyMiddleware, compose, combineReducers} from 'redux';
 import {Provider} from 'react-redux';
 import reducers from './reducers/index';
 import {initialState} from './initialState.js';
-import {fromJS} from 'immutable'
 import persistState from 'redux-localstorage'
 import routes from './routes';
 import thunk from 'redux-thunk';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
+import {syncHistoryWithStore, routerReducer} from 'react-router-redux'
 
 let middleware = [thunk];
 if(process.env.NODE_ENV !== 'production') middleware.push(require('redux-immutable-state-invariant')());
 
 const createStoreWithMiddleware = compose(
-  persistState(),
+  persistState(["consignors", "items"]),
   applyMiddleware(...middleware),
   window.devToolsExtension ? window.devToolsExtension() : f => f
 )(createStore);
 
+reducers.routing = routerReducer;
 const store = createStoreWithMiddleware(combineReducers(reducers), initialState);
 
+const history = syncHistoryWithStore(browserHistory, store);
 ReactDOM.render(
   <Provider store={store}>
-    <Router history={browserHistory}>{routes}</Router>
+    <Router history={history}>{routes}</Router>
   </Provider>,
   document.getElementById('app')
 );

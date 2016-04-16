@@ -25,7 +25,7 @@ export default function(state = {}, action) {
   // this is only necessarily because we're pushign to local storage, and we have to explicitly
   // map the items both ways.
   case 'ADD_ITEM':
-    return addItemMapping(state, item);
+    return addItemMapping(state, action.item);
   }
   return state;
 }

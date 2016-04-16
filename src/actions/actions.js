@@ -47,7 +47,7 @@ function addConsignorAction(consignor){
   return { type: 'ADD_CONSIGNOR', consignor }
 }
 
-function addConsignorLoading(isLoading = false){
+function addConsignorLoading(isLoading = true){
   return { type: 'ADD_CONSIGNOR_LOADING', isLoading }
 }
 

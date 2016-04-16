@@ -50,7 +50,7 @@ export default React.createClass({
         <label>Price</label>
         $<input id="price" defaultValue="" placeholder="0.00" name="price" ref="price" />
       </p>
-      <p><input type="submit" value="Add Consignor" /></p>
+      <p><input type="submit" value="Add Item" /></p>
       {this.props.isLoading && <img src="/img/loading.gif" />}
     </form>;
   }
