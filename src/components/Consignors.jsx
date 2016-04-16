@@ -16,7 +16,7 @@ export const Consignors = React.createClass({
 
 function mapStateToProps(state){
   return {
-    consignors: state.get('consignors')
+    consignors: state.consignors
   }
 }
 

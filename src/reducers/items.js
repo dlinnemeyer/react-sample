@@ -4,7 +4,7 @@ function addItem(state, item){
   });
 }
 
-export default function(state = Map(), action) {
+export default function(state = {}, action) {
   switch (action.type) {
   case 'ADD_ITEM':
     return addItem(state,action.item);

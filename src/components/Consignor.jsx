@@ -17,10 +17,10 @@ export const Consignor = React.createClass({
 });
 
 function mapStateToProps(state, props){
-  let consignor = state.get('consignors').get(props.params.consignorid);
+  let consignor = state.consignors[props.params.consignorid];
   return {
     consignor: consignor,
-    items: consignor.get("items").map(id => state.get("items").get(id))
+    items: consignor.items.map(id => state.items[id])
   }
 }
 

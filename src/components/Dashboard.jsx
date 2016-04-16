@@ -15,8 +15,8 @@ export const Dashboard = React.createClass({
 
 function mapStateToProps(state){
   return {
-    consignorCount: state.get('consignors').count(),
-    itemCount: state.get('items').count()
+    consignorCount: Object.keys(state.consignors).length,
+    itemCount: Object.keys(state.items).length
   }
 }
 

@@ -1,9 +1,9 @@
 export const displayName = function(consignor){
-  return consignor.get("company")
-    ? consignor.get("company")
-    : consignor.get("firstName") + " " + consignor.get("lastName");
+  return consignor.company
+    ? consignor.company
+    : consignor.firstName + " " + consignor.lastName;
 }
 
 export const linkPath = function(consignor){
-  return "/consignors/" + encodeURIComponent(consignor.get("id"));
+  return "/consignors/" + encodeURIComponent(consignor.id);
 }

@@ -33,8 +33,8 @@ export const AddItem = React.createClass({
 function mapStateToProps(state, props){
   return {
     // we'll need to request all the consignors for this? or probably ideally an autocomplete?
-    consignors: state.get("consignors"),
-    formLoading: state.getIn(["loading", "addItem"])
+    consignors: state.consignors,
+    formLoading: state.loading.addItem
   }
 }
 

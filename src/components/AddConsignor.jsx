@@ -32,7 +32,7 @@ export const AddConsignor = React.createClass({
 
 function mapStateToProps(state, props){
   return {
-    formLoading: state.getIn(["loading", "addConsignor"])
+    formLoading: state.loading.addConsignor
   }
 }
 

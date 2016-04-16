@@ -16,7 +16,7 @@ export const Items = React.createClass({
 
 function mapStateToProps(state){
   return {
-    items: state.get('items')
+    items: state.items
   }
 }
 

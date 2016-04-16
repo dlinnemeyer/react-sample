@@ -22,10 +22,10 @@ function mapStateToProps(state, props){
   // the fine-grained control seems like over-kill, but it's easier to follow? and probably
   // not as much of a pain if we go with a more formalized data-fetching layer with more
   // structured models? somewhere between this and ember?
-  let item = state.get('items').get(props.params.itemid);
+  let item = state.items[props.params.itemid]
   return {
     item: item,
-    consignor: state.get('consignors').get(item.get("consignorid"))
+    consignor: state.consignors[item.consignorid]
   }
 }
 

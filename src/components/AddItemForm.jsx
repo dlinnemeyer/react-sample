@@ -20,13 +20,17 @@ export default React.createClass({
   },
 
   render: function() {
+    let consignors = this.props.consignors;
     return <form onSubmit={this.submitHandler} ref="form">
       <p>
         <label>Consignor</label>
         <select name="consignorid" ref="consignorid">
-          {this.props.consignors.toList().map(consignor =>
-            <option key={consignor.get("id")} value={consignor.get("id")}>{displayName(consignor)}</option>
-          )}
+          {Object.keys(consignors).map(c => {
+            let consignor = consignors[c];
+            return (
+              <option key={consignor.id} value={consignor.id}>{displayName(consignor)}</option>
+            )
+          })}
         </select>
       </p>
       <p>
