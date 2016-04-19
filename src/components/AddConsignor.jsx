@@ -32,9 +32,7 @@ export const AddConsignor = React.createClass({
   },
 
   render(){
-    return <div>
-      <AddConsignorForm onSubmit={this.onSubmit} />
-    </div>;
+    return <AddConsignorForm onSubmit={this.onSubmit} />;
   }
 });
 

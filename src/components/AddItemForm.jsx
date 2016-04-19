@@ -1,30 +1,60 @@
-import React from 'react';
+import React, {PropTypes} from 'react';
 import {findDOMNode} from 'react-dom';
-import formSerialize from '../mixins/formSerialize';
 import {displayName} from '../models/consignor';
+import {reduxForm} from 'redux-form';
 
-export default React.createClass({
+const fields = ["sku", "consignorid", "title", "brand", "color", "size", "description" ,
+  "percSplit", "price"];
+const initialValues = {
+  percSplit: 50
+};
 
-  mixins: [formSerialize],
+const validate = values => {
+  const errors = {};
+  if(!values.sku){
+    errors.sku = "Required";
+  }
+  if(!values.title){
+    errors.title = "Required";
+  }
 
-  fields: ["consignorid", "title", "brand", "color", "size", "description" , "percSplit",
-    "price"],
+  if(!values.percSplit){
+    errors.percSplit = "Required";
+  }
+  const percSplit = parseFloat(values.percSplit);
+  if(isNaN(percSplit) || percSplit < 0){
+    errors.percSplit = "That's not a valid percent split.";
+  }
 
-  logSerialize(){
-    console.log(this.serialize());
-  },
+  if(!values.price){
+    errors.price = "Required";
+  }
+  const price = parseFloat(values.price);
+  if(isNaN(price) || price < 0){
+    errors.price = "That's not a valid price.";
+  }
 
-  submitHandler(event){
-    event.preventDefault();
-    this.props.onSubmit(this.serialize());
-  },
+  return errors;
+}
 
-  render: function() {
-    let consignors = this.props.consignors;
-    return <form onSubmit={this.submitHandler} ref="form">
+const AddItemForm = React.createClass({
+  render() {
+    const {
+      fields: { sku, consignorid, title, brand, color, size, description, percSplit, price },
+      // redux-form provided helpers
+      error, resetForm, handleSubmit, submitting, submitFailed,
+      // the form's other props
+      consignors
+    } = this.props
+
+    return <form onSubmit={handleSubmit}>
+      <p>
+        <input type="text" placeholder="sku" {...sku} />
+        {sku.touched && sku.error && <span className="error">{sku.error}</span>}
+      </p>
       <p>
         <label>Consignor</label>
-        <select name="consignorid" ref="consignorid">
+        <select {...consignorid}>
           {Object.keys(consignors).map(c => {
             let consignor = consignors[c];
             return (
@@ -34,25 +64,47 @@ export default React.createClass({
         </select>
       </p>
       <p>
-        <input defaultValue="" placeholder="title" name="title" ref="title" />
-        <input defaultValue="" placeholder="brand" name="brand" ref="brand" />
+        <input type="text" placeholder="title" {...title} />
+        {title.touched && title.error && <span className="error">{title.error}</span>}
       </p>
       <p>
-        <input defaultValue="" placeholder="color" name="color" ref="color" />
-        <input defaultValue="" placeholder="size" name="size" ref="size" />
-        <input defaultValue="" placeholder="description" name="description" ref="description" />
+        <input type="text" placeholder="brand" {...brand} />
+        <input type="text" placeholder="color" {...color} />
+      </p>
+      <p>
+        <input type="text" placeholder="size" {...size} />
+        <input type="text" placeholder="description" {...description} />
       </p>
       <p>
         <label>Consignor Split</label>
-        <input id="percSplit" defaultValue="50" name="percSplit" ref="percSplit" />%
+        <input type="text" placeholder="percSplit" {...percSplit} />
+        {percSplit.touched && percSplit.error && <span className="error">{percSplit.error}</span>}
       </p>
       <p>
         <label>Price</label>
-        $<input id="price" defaultValue="" placeholder="0.00" name="price" ref="price" />
+        $<input type="text" placeholder="price" {...price} />
+        {price.touched && price.error && <span className="error">{price.error}</span>}
       </p>
-      <p><input type="submit" value="Add Item" /></p>
-      {this.props.isLoading && <img src="/img/loading.gif" />}
+      {submitFailed && error && <span className="error">{error}</span>}
+      <p>
+        <input type="submit" value="Add Item" disabled={submitting} />
+        {submitting && <img src="/img/loading.gif" />}
+      </p>
     </form>;
   }
 });
 
+AddItemForm.propTypes = {
+  fields: PropTypes.object.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  error: PropTypes.string,
+  resetForm: PropTypes.func.isRequired,
+  submitting: PropTypes.bool.isRequired
+}
+
+export default reduxForm({
+  form: 'addItem',
+  fields,
+  validate,
+  initialValues
+})(AddItemForm);

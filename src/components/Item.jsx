@@ -2,13 +2,33 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ItemDetails from './ItemDetails'
+import {deleteItem, deleteItemLoading} from '../actions/actions.js';
+import LoadingOverlay from './LoadingOverlay'
+import {browserHistory} from 'react-router';
 
 export const Item = React.createClass({
   mixins: [PureRenderMixin],
 
+  deleteItem(item){
+    this.props.deleteItemLoading(true);
+    this.props.deleteItem(item)
+      .then(item => {
+        this.props.deleteItemLoading(false);
+        browserHistory.push('/items');
+      });
+  },
+
+  validItem(){
+    return !!(this.props.item);
+  },
+
   render: function() {
     return <div>
-      <ItemDetails item={this.props.item} consignor={this.props.consignor} />
+      {this.validItem()
+        ? <ItemDetails item={this.props.item} consignor={this.props.consignor}
+          deleteItem={this.deleteItem} />
+        : <div>Invalid itemid</div>}
+      {this.props.deleteIsLoading && <LoadingOverlay />}
     </div>;
   }
 });
@@ -25,9 +45,11 @@ function mapStateToProps(state, props){
   let item = state.items[props.params.itemid]
   return {
     item: item,
-    consignor: state.consignors[item.consignorid]
+    consignor: item ? state.consignors[item.consignorid] : undefined,
+    deleteIsLoading: state.loading.deleteItem
   }
 }
 
-export const ItemContainer = connect(mapStateToProps)(Item);
-
+export const ItemContainer = connect(mapStateToProps, {
+  deleteItem, deleteItemLoading
+})(Item);
