@@ -1,3 +1,4 @@
+// this was in use for our previous, non-redux-form forms. we should ditch it sometime.
 export default {
   serialize(){
     let data = {}, refs = this.refs;

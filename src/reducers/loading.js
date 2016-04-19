@@ -1,3 +1,9 @@
+// NOT IN USE ANYWHERE CURRENTLY
+// Just left this in here for example's sake, since I'm pretty sure we'll need this for page loading
+// or something like that.
+//
+// redux-form does a great job of handling loading/submitting for forms. But we'll have other contexts
+// we'll need loading I'm assuming? or just page loads?
 function addConsignorLoading(state, isLoading){
   return Object.assign({}, state, {
     addConsignor: isLoading

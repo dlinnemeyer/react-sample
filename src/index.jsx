@@ -9,6 +9,7 @@ import persistState from 'redux-localstorage'
 import routes from './routes';
 import thunk from 'redux-thunk';
 import {syncHistoryWithStore, routerReducer} from 'react-router-redux'
+import {reducer as formReducer} from 'redux-form'
 
 let middleware = [thunk];
 if(process.env.NODE_ENV !== 'production') middleware.push(require('redux-immutable-state-invariant')());
@@ -20,6 +21,7 @@ const createStoreWithMiddleware = compose(
 )(createStore);
 
 reducers.routing = routerReducer;
+reducers.form = formReducer;
 const store = createStoreWithMiddleware(combineReducers(reducers), initialState);
 
 const history = syncHistoryWithStore(browserHistory, store);
