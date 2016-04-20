@@ -1,3 +1,5 @@
+import consignors from "../data/consignors"
+
 export function addConsignor(consignor){
   return (dispatch, getStore) => {
     // We don't bother with error handling on this promise. We don't have any global error handling
@@ -53,6 +55,16 @@ export function deleteItemLoading(isLoading){
   return {
     type: 'DELETE_ITEM_LOADING',
     isLoading
+  }
+}
+
+export function getConsignor(id){
+  return (dispatch, getStore) => {
+    return consignors.get(id, getStore())
+      .then(consignor => {
+        dispatch(getConsignorAction(consignor));
+        return consignor;
+      });
   }
 }
 
@@ -145,6 +157,10 @@ function addConsignorAction(consignor){
 
 function deleteConsignorAction(consignor){
   return { type: 'DELETE_CONSIGNOR', consignor }
+}
+
+function getConsignorAction(consignor){
+  return { type: 'GET_CONSIGNOR', consignor }
 }
 
 // not sure what to call this? it's the pure action generator, as opposed to the thunk-ified one

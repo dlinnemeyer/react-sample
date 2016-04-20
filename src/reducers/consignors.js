@@ -38,6 +38,8 @@ export default function(state = {}, action) {
     return addConsignor(state, action.consignor);
   case 'DELETE_CONSIGNOR':
     return deleteConsignor(state, action.consignor);
+  case 'GET_CONSIGNOR':
+    return addConsignor(state, action.consignor);
   // this is only necessarily because we're pushign to local storage, and we have to explicitly
   // map the items both ways.
   case 'ADD_ITEM':

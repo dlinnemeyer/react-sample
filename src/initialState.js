@@ -3,6 +3,12 @@ export const initialState = {
   items: {},
   loading: {
     deleteConsignor: false,
-    deleteItem: false
+    deleteItem: false,
+    pages: {
+      viewConsignor: {
+        consignor: false,
+        items: false
+      }
+    }
   }
 };

@@ -4,11 +4,26 @@ import {connect} from 'react-redux';
 import {displayName} from '../models/consignor';
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
+import {getConsignor} from '../actions/actions'
 
 export const Consignor = React.createClass({
   mixins: [PureRenderMixin],
 
+  id(){
+    return this.props.params.consignorid;
+  },
+
+  componentWillMount(){
+    this.props.getConsignorLoading(true);
+    this.props.getConsignor(this.id())
+      .then(consignor => {
+        this.props.getConsignorLoading(false);
+        // load items after loading consignor?
+      })
+  },
+
   render: function() {
+    // TODO: if viewConsignor loading, display loading overlay
     return <div>
       <ConsignorDetails consignor={this.props.consignor} />
       <ItemList items={this.props.items} />
@@ -17,11 +32,11 @@ export const Consignor = React.createClass({
 });
 
 function mapStateToProps(state, props){
-  let consignor = state.consignors[props.params.consignorid];
   return {
-    consignor: consignor,
-    items: consignor.items.map(id => state.items[id])
+    loading: state.loading.pages.viewConsignor
   }
 }
 
-export const ConsignorContainer = connect(mapStateToProps)(Consignor);
+export const ConsignorContainer = connect(mapStateToProps, {
+  getConsignor
+})(Consignor);
