@@ -1,10 +1,14 @@
-import React from 'react';
+import React, {PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
-import {displayName} from '../models/consignor';
+import {displayName, get as getConsignorFromState} from '../models/consignor';
+import {getAll as getItemsFromState} from '../models/item';
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
-import {getConsignor} from '../actions/actions'
+import {loadConsignors} from '../actions/consignors'
+import {loadItems} from '../actions/items'
+import {loading} from '../actions/general'
+import InnerLoading from './InnerLoading'
 
 export const Consignor = React.createClass({
   mixins: [PureRenderMixin],
@@ -13,30 +17,83 @@ export const Consignor = React.createClass({
     return this.props.params.consignorid;
   },
 
+  // This is where the current redux-react stack is kind of weird. in most cases, a component
+  // simply renders a given state, and sends actions back up to our redux actions based on user
+  // interactions (e.g. render a consignor list; when the user clicks on delete, issue a
+  // deleteConsignor action).
+  // But here we're performing redux actions (manipulating state by loading in consignor details that
+  // weren't there before) based on when a component loads, not based on user behavior.
+  // The counter could be that loading the component is user behavior (they're requesting the data),
+  // but that feels like a stretch. It seems to make much more sense to declare the needs
+  // for a component (component X needs A, B, and C from the state), and somewhere else in the tool,
+  // describe how to get A,B,C, etc. from the state when components needs it? I'm guessing that's
+  // where graphql and falcor are headed?
   componentWillMount(){
-    this.props.getConsignorLoading(true);
-    this.props.getConsignor(this.id())
-      .then(consignor => {
-        this.props.getConsignorLoading(false);
-        // load items after loading consignor?
+    // we're getting closer. this should be easy to wrap.
+    // keying to different ids for now? that way we're not mixing up state in case of multiple
+    // consignor components? not sure of the best practice there.
+    // redux form gets away with just naming the form, but I think that's because you never
+    // have the same form on the page multiple times? maybe?
+    const loadingId = "consignor" + this.id();
+    // we should refactor to let some itemlist wrapper component pull its own data based on filters
+    const itemsLoadingId = "consignor-items" + this.id();
+
+    this.props.loading(loadingId, true);
+    this.props.loading(itemsLoadingId, true);
+
+    this.props.loadConsignors([this.id()])
+      .then(consignors => {
+        const consignor = consignors[this.id()];
+        this.props.loading(loadingId, false);
+        // now make sure the items get loaded, too
+        console.log(consignor.items);
+        return this.props.loadItems(consignor.items);
       })
+      // magic promise chain. then next then will run when getItems() is finished
+      .then(items => {
+        console.log(items);
+        this.props.loading(itemsLoadingId, false);
+      });
   },
 
   render: function() {
-    // TODO: if viewConsignor loading, display loading overlay
+    const { consignorLoading, itemsLoading, consignor, items } = this.props;
+
+    // early return because we have nested ifs with the loading. again, this is solved if we
+    // get a separate itemslist component that does its own loading
+    if(consignorLoading) return <InnerLoading />;
+
     return <div>
-      <ConsignorDetails consignor={this.props.consignor} />
-      <ItemList items={this.props.items} />
+      <ConsignorDetails consignor={consignor} />
+      {itemsLoading
+        ? <InnerLoading />
+        : <ItemList items={items} />}
     </div>;
   }
 });
 
+Consignor.propTypes = {
+  consignorLoading: PropTypes.bool.isRequired,
+  itemsLoading: PropTypes.bool.isRequired,
+  consignor: PropTypes.object.isRequired,
+  items: PropTypes.array.isRequired
+}
+
 function mapStateToProps(state, props){
+  const id = props.params.consignorid;
+  const consignor = getConsignorFromState(state, id) || {};
+  // this items part will have to go through some re-working if we make it filterable. probably
+  // an itemlist component that takes filters instead of itemids and retrieves its own itemids?
+  const items = getItemsFromState(state, consignor.items ? consignor.items : []);
+
   return {
-    loading: state.loading.pages.viewConsignor
+    consignorLoading: !!(state.loading["consignor" + id]),
+    itemsLoading: !!(state.loading["consignor-items" + id]),
+    consignor,
+    items
   }
 }
 
 export const ConsignorContainer = connect(mapStateToProps, {
-  getConsignor
+  loadConsignors, loadItems, loading
 })(Consignor);

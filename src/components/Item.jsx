@@ -2,7 +2,7 @@ import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ItemDetails from './ItemDetails'
-import {deleteItem, deleteItemLoading} from '../actions/actions.js';
+import {deleteItem} from '../actions/items.js';
 import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router';
 
@@ -10,10 +10,10 @@ export const Item = React.createClass({
   mixins: [PureRenderMixin],
 
   deleteItem(item){
-    this.props.deleteItemLoading(true);
+    this.props.loading("deleteItem", true);
     this.props.deleteItem(item)
       .then(item => {
-        this.props.deleteItemLoading(false);
+        this.props.loading("deleteItem", false);
         browserHistory.push('/items');
       });
   },
@@ -51,5 +51,5 @@ function mapStateToProps(state, props){
 }
 
 export const ItemContainer = connect(mapStateToProps, {
-  deleteItem, deleteItemLoading
+  deleteItem
 })(Item);

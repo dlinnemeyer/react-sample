@@ -3,8 +3,11 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ConsignorList from './ConsignorList';
 import {Link} from 'react-router';
-import {deleteConsignor, deleteConsignorLoading} from '../actions/actions.js';
-import LoadingOverlay from './LoadingOverlay'
+import {loadConsignors, deleteConsignor} from '../actions/consignors.js';
+import {loading} from '../actions/general.js';
+import InnerLoading from './InnerLoading'
+
+const loadingId = "consignorslist";
 
 export const Consignors = React.createClass({
   deleteConsignor(consignor){
@@ -18,27 +21,41 @@ export const Consignors = React.createClass({
     // That would store true/false in loading.deleteConsignor[id] in the state.
     // It could also return a promise that passes along the values from deleteConsignor, so you
     // could still chain on it
-    this.props.deleteConsignorLoading(true);
+    this.props.loading(loadingId, true);
     this.props.deleteConsignor(consignor)
-      .then(consignor => this.props.deleteConsignorLoading(false));
+      .then(consignor => this.props.loading(loadingId, false));
+  },
+
+  componentWillMount(){
+    this.props.loading(loadingId, true);
+    this.props.loadConsignors()
+      .then(consignors => {
+        this.props.loading(loadingId, false);
+      });
   },
 
   render() {
+    const {isLoading, consignors} = this.props;
     return <div>
       <Link to="/consignors/new">Add Consignor</Link>
-      <ConsignorList consignors={this.props.consignors} deleteConsignor={this.deleteConsignor} />
-      {this.props.deleteIsLoading && <LoadingOverlay />}
+      {isLoading
+        ? <InnerLoading />
+        : <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor} />}
     </div>;
   }
 });
 
 function mapStateToProps(state){
   return {
+    // TODO: we need to figure out a better state structure for this page, since right now it just
+    // hooks into the data consignors hash, which is more a model repository.
+    // Maybe a pages object, keyed to pagename, that stores page-specific state? we could
+    // store an array of currently displayed consignorsids there, with pagination info and filters?
     consignors: state.consignors,
-    deleteIsLoading: state.loading.deleteConsignor
+    isLoading: state.loading[loadingId]
   }
 }
 
 export const ConsignorsContainer = connect(mapStateToProps, {
-  deleteConsignor, deleteConsignorLoading
+  deleteConsignor, loading, loadConsignors
 })(Consignors);

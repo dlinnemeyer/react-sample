@@ -1,7 +1,11 @@
-function addConsignor(state, consignor){
+function loadConsignor(state, consignor){
   return Object.assign({}, state, {
     [consignor.id]: consignor
   });
+}
+
+function loadConsignors(state, consignors){
+  return Object.assign({}, state, consignors);
 }
 
 function deleteConsignor(state, consignor){
@@ -35,11 +39,11 @@ function deleteItemMapping(state, item){
 export default function(state = {}, action) {
   switch (action.type) {
   case 'ADD_CONSIGNOR':
-    return addConsignor(state, action.consignor);
+    return loadConsignor(state, action.consignor);
   case 'DELETE_CONSIGNOR':
     return deleteConsignor(state, action.consignor);
-  case 'GET_CONSIGNOR':
-    return addConsignor(state, action.consignor);
+  case 'LOAD_CONSIGNORS':
+    return loadConsignors(state, action.consignors);
   // this is only necessarily because we're pushign to local storage, and we have to explicitly
   // map the items both ways.
   case 'ADD_ITEM':

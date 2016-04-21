@@ -3,7 +3,8 @@ import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {displayName} from '../models/item';
 import AddItemForm from './AddItemForm';
-import {loading, addItem} from '../actions/actions.js';
+import {loading} from '../actions/general.js';
+import {addItem} from '../actions/items.js';
 import {browserHistory} from 'react-router';
 
 export const AddItem = React.createClass({

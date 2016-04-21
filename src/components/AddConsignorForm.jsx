@@ -47,6 +47,7 @@ const AddConsignorForm = React.createClass({
           Store Account
         </label>
         <input type="text" placeholder="Split" {...defaultPercSplit} />
+        {defaultPercSplit.touched && defaultPercSplit.error && <span className="error">{defaultPercSplit.error}</span>}
       </p>
       <p>
         <input type="text" placeholder="Address" {...address} />
