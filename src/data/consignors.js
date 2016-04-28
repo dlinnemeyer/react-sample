@@ -22,6 +22,14 @@ export function getAll(ids){
   });
 }
 
+export function search(data){
+  return promiseDelay((resolve, reject) => {
+    const allConsignors = __getConsignors();
+    // TODO: filter based on data object
+    const filtered = allConsignors;
+    resolve(filtered);
+  });
+}
 
 export function add(consignor){
   return promiseDelay((resolve, reject) => {

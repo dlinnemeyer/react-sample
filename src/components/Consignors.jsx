@@ -1,8 +1,9 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import ConsignorList from './ConsignorList';
+import ConsignorListFilter from './ConsignorListFilter';
 import {Link} from 'react-router';
-import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors} from '../actions/consignors.js';
+import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors, searchConsignors} from '../actions/consignors.js';
 import {loading} from '../actions/general.js';
 import InnerLoading from './InnerLoading'
 
@@ -33,6 +34,14 @@ export const Consignors = React.createClass({
       });
   },
 
+  onFilterSubmit(data, dispatch){
+    // async data search that returns consignorids. searchConsignors populates the model repo for us
+    // and sets our state.consignorSearch.ids
+    // TODO: this will need to get more elaborate with pagination (totalResults, offset, etc.)
+    // once other elements start searching consignors, this will likely need a namespace
+    return this.props.searchConsignors(data);
+  },
+
   render() {
     const {isLoading, consignors, addFakeConsignors, deleteAllConsignors} = this.props;
     const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
@@ -43,22 +52,24 @@ export const Consignors = React.createClass({
       <a href="#" onClick={_deleteAllConsignors}>Delete All</a>
       {isLoading
         ? <InnerLoading />
-        : <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor} />}
+        : (<div>
+          <ConsignorListFilter onSubmit={this.onFilterSubmit} />
+          <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor} />
+        </div>)}
     </div>;
   }
 });
 
 function mapStateToProps(state){
+  // we'll need pagination at some point. for now, just grad consignorids resulting from the search?
   return {
-    // TODO: we need to figure out a better state structure for this page, since right now it just
-    // hooks into the data consignors hash, which is more a model repository.
-    // Maybe a pages object, keyed to pagename, that stores page-specific state? we could
-    // store an array of currently displayed consignorsids there, with pagination info and filters?
+    consignorids: state.consignorSearch.ids,
+    // TODO: grab all the consignors from state.consignors that correspond to search ids
     consignors: state.consignors,
     isLoading: state.loading[loadingId]
   }
 }
 
 export const ConsignorsContainer = connect(mapStateToProps, {
-  deleteConsignor, loading, loadConsignors, addFakeConsignors, deleteAllConsignors
+  deleteConsignor, loading, loadConsignors, addFakeConsignors, deleteAllConsignors, searchConsignors
 })(Consignors);

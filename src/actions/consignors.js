@@ -3,12 +3,12 @@ import {globalErrorize} from "./misc"
 import faker from "faker"
 
 export function addConsignor(consignor){
-  return (dispatch, getStore) => {
+  return (dispatch) => {
     // We don't bother with error handling on this promise. We don't have any global error handling
     // to do, and components actually calling this action can catch errors.
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
-    return consignors.add(consignor, getStore())
+    return consignors.add(consignor)
       .then(consignor => {
         dispatch(addConsignorAction(consignor));
         // in case anyone else is chaining on this? though they probably shouldn't, since
@@ -20,7 +20,7 @@ export function addConsignor(consignor){
 }
 
 export function deleteConsignor(consignor){
-  return (dispatch, getStore) => {
+  return (dispatch) => {
     return consignors.del(consignor)
       .then(consignor => {
         dispatch(deleteConsignorAction(consignor));
@@ -31,8 +31,19 @@ export function deleteConsignor(consignor){
 }
 
 export function loadConsignors(ids){
-  return (dispatch, getStore) => {
+  return (dispatch) => {
     return consignors.getAll(ids)
+      .then(consignors => {
+        dispatch(loadConsignorsAction(consignors));
+        return consignors;
+      })
+      .catch(globalErrorize(dispatch));
+  }
+}
+
+export function searchConsignors(data){
+  return dispatch => {
+    return consignors.search(data)
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors));
         return consignors;
