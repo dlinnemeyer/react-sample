@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import ItemList from './ItemList';
-import {loadItems} from '../actions/items.js';
+import {loadItems, addFakeItems, deleteAllItems} from '../actions/items.js';
 import {loading} from '../actions/general.js';
 import {Link} from 'react-router';
 import InnerLoading from './InnerLoading'
@@ -19,9 +19,13 @@ export const Items = React.createClass({
   },
 
   render() {
-    const {isLoading, items} = this.props;
+    const {isLoading, items, addFakeItems, deleteAllItems} = this.props;
+    const _addFakeItems = e => { e.preventDefault(); addFakeItems(); }
+    const _deleteAllItems = e => { e.preventDefault(); deleteAllItems(); }
     return <div>
-      <Link to="/items/new">Add Item</Link>
+      <Link to="/items/new">Add Item</Link><br />
+      <a href="#" onClick={_addFakeItems}>Add Lots O' Items</a><br />
+      <a href="#" onClick={_deleteAllItems}>Delete All</a>
       {isLoading
         ? <InnerLoading />
         : <ItemList items={items} />}
@@ -50,5 +54,5 @@ function mapStateToProps(state){
 }
 
 export const ItemsContainer = connect(mapStateToProps, {
-  loadItems, loading
+  loadItems, loading, addFakeItems, deleteAllItems
 })(Items);

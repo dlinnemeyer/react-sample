@@ -1,25 +1,30 @@
 import React, {PropTypes} from 'react';
-import {displayName,linkPath} from '../models/consignor';
+import {displayName as consignorDisplayName,linkPath} from '../models/consignor';
 import Address from './Address';
 import {Link} from 'react-router';
 
 const ConsignorList = React.createClass({
   render: function() {
     const consignors = this.props.consignors;
-    return <div>
+    return <table><tbody>
       {Object.keys(consignors).filter(c => consignors[c]).map(c => {
         const consignor = consignors[c];
         const del = () => this.props.deleteConsignor(consignor);
         return (
-          <div className="consignor" key={consignor.id}>
-            <h3><Link to={linkPath(consignor)}>{displayName(consignor)}</Link></h3>
-            <p><a href='#' onClick={del}>delete</a></p>
-            <p>{consignor.items.length} items</p>
-            <Address name={displayName(consignor)} {...consignor} />
-          </div>
+          <tr key={consignor.id}>
+            <td><Link to={linkPath(consignor)}>{displayName(consignor)}</Link></td>
+            <td>{consignor.items.length} items</td>
+            <td>{consignor.isStoreAccount}</td>
+            <td>{consignor.defaultPercSplit}</td>
+            <td>{consignor.address} {consignor.address2}</td>
+            <td>{consignor.city}</td>
+            <td>{consignor.state}</td>
+            <td>{consignor.zip}</td>
+            <td><a href='#' onClick={del}>delete</a></td>
+          </tr>
         )
       })}
-    </div>;
+    </tbody></table>;
   }
 });
 

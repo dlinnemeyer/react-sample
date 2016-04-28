@@ -20,7 +20,9 @@ function addItemMapping(state, item){
   // out there that offers quick immutable mutation functions? react update helper looked
   // alright, but a little weird (http://facebook.github.io/react/docs/update.html)
   let consignor = Object.assign({}, state[item.consignorid]);
-  consignor.items = [...consignor.items, item.id];
+  if(!consignor) return state;
+
+  consignor.items = consignor.items ? [...consignor.items, item.id] : [item.id];
   return Object.assign({}, state, {
     [item.consignorid]: consignor
   });
@@ -28,6 +30,8 @@ function addItemMapping(state, item){
 
 function deleteItemMapping(state, item){
   let consignor = Object.assign({}, state[item.consignorid]);
+  if(!consignor) return state;
+
   consignor.items = consignor.items.filter(id => id !== item.id);
   return Object.assign({}, state, {
     [item.consignorid]: consignor

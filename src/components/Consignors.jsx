@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import ConsignorList from './ConsignorList';
 import {Link} from 'react-router';
-import {loadConsignors, deleteConsignor} from '../actions/consignors.js';
+import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors} from '../actions/consignors.js';
 import {loading} from '../actions/general.js';
 import InnerLoading from './InnerLoading'
 
@@ -34,9 +34,13 @@ export const Consignors = React.createClass({
   },
 
   render() {
-    const {isLoading, consignors} = this.props;
+    const {isLoading, consignors, addFakeConsignors, deleteAllConsignors} = this.props;
+    const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
+    const _deleteAllConsignors = e => { e.preventDefault(); deleteAllConsignors(); }
     return <div>
-      <Link to="/consignors/new">Add Consignor</Link>
+      <Link to="/consignors/new">Add Consignor</Link><br />
+      <a href="#" onClick={_addFakeConsignors}>Add Lots O' Consignors</a><br />
+      <a href="#" onClick={_deleteAllConsignors}>Delete All</a>
       {isLoading
         ? <InnerLoading />
         : <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor} />}
@@ -56,5 +60,5 @@ function mapStateToProps(state){
 }
 
 export const ConsignorsContainer = connect(mapStateToProps, {
-  deleteConsignor, loading, loadConsignors
+  deleteConsignor, loading, loadConsignors, addFakeConsignors, deleteAllConsignors
 })(Consignors);

@@ -1,5 +1,6 @@
 import * as consignors from "../data/consignors"
 import {globalErrorize} from "./misc"
+import faker from "faker"
 
 export function addConsignor(consignor){
   return (dispatch, getStore) => {
@@ -37,6 +38,48 @@ export function loadConsignors(ids){
         return consignors;
       })
       .catch(globalErrorize(dispatch));
+  }
+}
+
+export function addFakeConsignors(num = 50){
+  const newConsignors = {};
+  let i = 0;
+  while(num > i){
+    let consignor = fakeConsignor();
+    newConsignors[consignor.id] = consignor;
+    i++;
+  }
+  consignors.__setConsignors(Object.assign({},
+    consignors.__getConsignors(),
+    newConsignors
+  ));
+
+  return loadConsignorsAction(newConsignors);
+}
+
+export function deleteAllConsignors(){
+  return dispatch => {
+    const all = consignors.__getConsignors();
+    consignors.__setConsignors({});
+    Object.keys(all).forEach(cid => dispatch(deleteConsignorAction(all[cid])));
+  }
+}
+
+function fakeConsignor(){
+  return {
+    id: faker.random.uuid(),
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    company: faker.random.number(10) > 7 ? faker.company.companyName() : "",
+    isStoreAccount: faker.random.boolean(),
+    defaultPercSplit: faker.random.number(100),
+    address: faker.address.streetAddress(),
+    address2: faker.address.secondaryAddress(),
+    city: faker.address.city(),
+    state: faker.address.stateAbbr(),
+    zip: faker.address.zipCode(),
+    email: faker.internet.email(),
+    items: []
   }
 }
 

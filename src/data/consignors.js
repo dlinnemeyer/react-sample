@@ -2,13 +2,19 @@ import {promiseDelay} from './misc'
 import store from 'store'
 import {arrToHash} from '../misc'
 
-function getConsignors(){
+// exported because we use it in certain hackish contexts for development reasons. should be removed
+// later
+export function __getConsignors(){
   return store.get("consignors") || {};
+}
+
+export function __setConsignors(consignors){
+  return store.set("consignors", consignors);
 }
 
 export function getAll(ids){
   return promiseDelay((resolve, reject) => {
-    const allConsignors = getConsignors();
+    const allConsignors = __getConsignors();
     const consignors = ids
       ? arrToHash(ids.map(id => allConsignors[id]).filter(c => !!(c)))
       : allConsignors;
@@ -22,7 +28,7 @@ export function add(consignor){
     if(!consignor.items) consignor.items = [];
     if(!consignor.id) consignor.id = (Math.floor(Math.random() * 1000000)) + "";
 
-    const consignors = getConsignors();
+    const consignors = __getConsignors();
     const emails = Object.keys(consignors).map(id => consignors[id].email);
     if(emails.indexOf(consignor.email) > -1){
       reject({code: 23, title: "duplicate_email"});
@@ -30,7 +36,7 @@ export function add(consignor){
     }
 
     consignors[consignor.id] = consignor;
-    store.set("consignors", consignors);
+    __setConsignors(consignors);
     resolve(consignor);
   });
 }
@@ -38,9 +44,9 @@ export function add(consignor){
 // another "ajax" call
 export function del(consignor){
   return promiseDelay((resolve, reject) => {
-    const consignors = getConsignors();
+    const consignors = __getConsignors();
     delete consignors[consignor.id];
-    store.set("consignors", consignors);
+    __setConsignors(consignors);
     resolve(consignor);
   });
 }
