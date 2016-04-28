@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
-import {displayName, get as getConsignorFromState} from '../models/consignor';
+import {get as getConsignorFromState} from '../models/consignor';
 import {getAll as getItemsFromState} from '../models/item';
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
@@ -46,12 +46,10 @@ export const Consignor = React.createClass({
         const consignor = consignors[this.id()];
         this.props.loading(loadingId, false);
         // now make sure the items get loaded, too
-        console.log(consignor.items);
         return this.props.loadItems(consignor.items);
       })
       // magic promise chain. then next then will run when getItems() is finished
       .then(items => {
-        console.log(items);
         this.props.loading(itemsLoadingId, false);
       });
   },
