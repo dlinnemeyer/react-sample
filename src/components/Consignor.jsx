@@ -1,5 +1,4 @@
 import React, {PropTypes} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {get as getConsignorFromState} from '../models/consignor';
 import {getAll as getItemsFromState} from '../models/item';
@@ -7,11 +6,11 @@ import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
 import {loadConsignors} from '../actions/consignors'
 import {loadItems} from '../actions/items'
-import {loading} from '../actions/general'
+import {loading, error} from '../actions/general'
 import InnerLoading from './InnerLoading'
+import Error from './Error'
 
 export const Consignor = React.createClass({
-  mixins: [PureRenderMixin],
 
   id(){
     return this.props.params.consignorid;
@@ -39,13 +38,18 @@ export const Consignor = React.createClass({
     const itemsLoadingId = "consignor-items" + this.id();
 
     this.props.loading(loadingId, true);
-    this.props.loading(itemsLoadingId, true);
 
     this.props.loadConsignors([this.id()])
       .then(consignors => {
-        const consignor = consignors[this.id()];
         this.props.loading(loadingId, false);
+        const consignor = consignors ? consignors[this.id()] : undefined;
+        if(!consignor){
+          this.props.error(loadingId, "That's not a valid consignor.");
+          return;
+        }
+
         // now make sure the items get loaded, too
+        this.props.loading(itemsLoadingId, true);
         return this.props.loadItems(consignor.items);
       })
       // magic promise chain. then next then will run when getItems() is finished
@@ -55,7 +59,9 @@ export const Consignor = React.createClass({
   },
 
   render: function() {
-    const { consignorLoading, itemsLoading, consignor, items } = this.props;
+    const { consignorLoading, itemsLoading, consignor, items, errorMessage } = this.props;
+
+    if(errorMessage) return <Error message={errorMessage} />;
 
     // early return because we have nested ifs with the loading. again, this is solved if we
     // get a separate itemslist component that does its own loading
@@ -74,7 +80,8 @@ Consignor.propTypes = {
   consignorLoading: PropTypes.bool.isRequired,
   itemsLoading: PropTypes.bool.isRequired,
   consignor: PropTypes.object.isRequired,
-  items: PropTypes.array.isRequired
+  items: PropTypes.array.isRequired,
+  errorMessage: PropTypes.string.isRequired
 }
 
 function mapStateToProps(state, props){
@@ -87,11 +94,12 @@ function mapStateToProps(state, props){
   return {
     consignorLoading: !!(state.loading["consignor" + id]),
     itemsLoading: !!(state.loading["consignor-items" + id]),
+    errorMessage: state.error["consignor"+id] || "",
     consignor,
     items
   }
 }
 
 export const ConsignorContainer = connect(mapStateToProps, {
-  loadConsignors, loadItems, loading
+  loadConsignors, loadItems, loading, error
 })(Consignor);

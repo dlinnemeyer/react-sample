@@ -1,4 +1,18 @@
 import * as items from "../data/items"
+// I don't like the globalErrorize method, since the current methodology forces every async action
+// to remember to add it. I wonder if we could add a wrapper to ajax calls
+// that could handle calling the globalError action on specified error codes. for example:
+//    function errorizedAjax(...args){
+//      return call(ajax, args)
+//        // for 500+ errors
+//        .catch(serverErrorize)
+//        // for authorized errors
+//        .catch(authErrorize);
+//    }
+// We could also pass it only error codes we want to ignore. or we could pass it a hash of
+// error code => handler. or something nice and function, where errorizedAjax returns a function
+// that calls ajax and auto-adds the handlers. either way is fine.
+import {globalErrorize} from "./misc"
 
 // TODO: abstract this? this file is pretty much identical to the consignors actions.
 // I wonder if we could just have generic model functions that add/delete/load models and
@@ -18,7 +32,8 @@ export function addItem(item){
         // in case anyone else is chaining on this? though they probably shouldn't, since
         // everything else should flow through redux actions/reducers?
         return item;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 
@@ -28,7 +43,8 @@ export function deleteItem(item){
       .then(item => {
         dispatch(deleteItemAction(item));
         return item;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 
@@ -38,7 +54,8 @@ export function loadItems(ids){
       .then(items => {
         dispatch(loadItemsAction(items));
         return items;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 

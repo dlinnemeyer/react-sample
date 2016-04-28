@@ -1,5 +1,4 @@
 import React, {PropTypes} from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import ItemDetails from './ItemDetails'
 import {get as getConsignorFromState} from '../models/consignor';
@@ -7,14 +6,13 @@ import {get as getItemFromState} from '../models/item';
 import {deleteItem} from '../actions/items.js';
 import {loadConsignors} from '../actions/consignors'
 import {loadItems} from '../actions/items'
-import {loading} from '../actions/general'
+import {loading, error} from '../actions/general'
 import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router';
 import InnerLoading from './InnerLoading'
+import Error from './Error'
 
 export const Item = React.createClass({
-  mixins: [PureRenderMixin],
-
   id(){
     return this.props.params.itemid;
   },
@@ -37,13 +35,18 @@ export const Item = React.createClass({
     const consignorLoadingId = this.consignorLoadingId();
 
     this.props.loading(loadingId, true);
-    this.props.loading(consignorLoadingId, true);
 
     this.props.loadItems([this.id()])
       .then(items=> {
-        const item = items[this.id()];
         this.props.loading(loadingId, false);
+        const item = items ? items[this.id()] : undefined;
+        if(!item){
+          this.props.error(loadingId, "That's not a valid item.");
+          return;
+        }
+
         // now make sure the consignor get loaded, too. this feels painful.
+        this.props.loading(consignorLoadingId, true);
         return this.props.loadConsignors([item.consignorid]);
       })
       .then(consignors => {
@@ -61,7 +64,9 @@ export const Item = React.createClass({
   },
 
   render: function() {
-    const { itemLoading, deleteLoading, consignorLoading, consignor, item } = this.props;
+    const { itemLoading, deleteLoading, consignorLoading, consignor, item, errorMessage } = this.props;
+
+    if(errorMessage) return <Error message={errorMessage} />;
 
     // TODO: split consignor link off to a separate component? not sure we can do that.
     // is there a way to request both item and consignor at the same time?
@@ -79,7 +84,8 @@ Item.propTypes = {
   consignorLoading: PropTypes.bool.isRequired,
   deleteLoading: PropTypes.bool.isRequired,
   consignor: PropTypes.object.isRequired,
-  item: PropTypes.object.isRequired
+  item: PropTypes.object.isRequired,
+  errorMessage: PropTypes.string.isRequired
 }
 
 function mapStateToProps(state, props){
@@ -95,9 +101,10 @@ function mapStateToProps(state, props){
     itemLoading: !!(state.loading["item"+id]),
     deleteLoading: !!(state.loading["item-delete"+id]),
     consignorLoading: !!(state.loading["item-consignor"+id]),
+    errorMessage: state.error["item"+id] || ""
   }
 }
 
 export const ItemContainer = connect(mapStateToProps, {
-  deleteItem, loading, loadItems, loadConsignors
+  deleteItem, loading, loadItems, loadConsignors, error
 })(Item);

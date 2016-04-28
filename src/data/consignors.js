@@ -6,12 +6,6 @@ function getConsignors(){
   return store.get("consignors") || {};
 }
 
-export function get(id){
-  return promiseDelay((resolve, reject) => {
-    resolve(getConsignors()[id]);
-  });
-}
-
 export function getAll(ids){
   return promiseDelay((resolve, reject) => {
     const allConsignors = getConsignors();

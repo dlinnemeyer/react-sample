@@ -1,13 +1,14 @@
-function loading(state, id, isLoading){
+function error(state, id, message){
   return Object.assign({}, state, {
-    [id]: isLoading
+    [id]: message
   });
 }
 
 export default function(state = {}, action) {
   switch (action.type) {
-  case 'LOADING':
-    return loading(state, action.id, action.isLoading);
+  case 'ERROR':
+    return error(state, action.id, action.message);
   }
   return state;
 }
+

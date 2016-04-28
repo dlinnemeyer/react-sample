@@ -1,5 +1,4 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {displayName} from '../models/item';
 import AddItemForm from './AddItemForm';
@@ -8,7 +7,6 @@ import {addItem} from '../actions/items.js';
 import {browserHistory} from 'react-router';
 
 export const AddItem = React.createClass({
-  mixins: [PureRenderMixin],
   onSubmit(data, dispatch){
     // should we just dispatch(addItem(data)) instead of doing the redux-action-binding thing?
     // seems more transparent?

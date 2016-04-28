@@ -1,5 +1,4 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import {displayName} from '../models/consignor';
 import AddConsignorForm from './AddConsignorForm'
@@ -7,7 +6,6 @@ import {addConsignor} from '../actions/consignors.js';
 import {browserHistory} from 'react-router';
 
 export const AddConsignor = React.createClass({
-  mixins: [PureRenderMixin],
   onSubmit(data, dispatch){
     // should we just dispatch(addConsignor(data)) instead of doing the redux-action-binding thing?
     // seems more transparent?

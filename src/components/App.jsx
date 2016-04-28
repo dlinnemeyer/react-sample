@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {Link} from 'react-router';
+import GlobalError from './GlobalError';
 
 export const App = React.createClass({
   render: function() {
@@ -10,6 +11,7 @@ export const App = React.createClass({
         <Link to='/consignors'>Consignors</Link>{" "}
         <Link to='/items'>Items</Link>
       </nav>
+      {this.props.globalError && <GlobalError message={this.props.globalError} />}
       {this.props.children}
     </div>
   }
@@ -17,7 +19,7 @@ export const App = React.createClass({
 
 function mapStateToProps(state) {
   return {
-
+    globalError: state.error.global
   }
 }
 

@@ -1,4 +1,5 @@
 import * as consignors from "../data/consignors"
+import {globalErrorize} from "./misc"
 
 export function addConsignor(consignor){
   return (dispatch, getStore) => {
@@ -12,7 +13,8 @@ export function addConsignor(consignor){
         // in case anyone else is chaining on this? though they probably shouldn't, since
         // everything else should flow through redux actions/reducers?
         return consignor;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 
@@ -22,7 +24,8 @@ export function deleteConsignor(consignor){
       .then(consignor => {
         dispatch(deleteConsignorAction(consignor));
         return consignor;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 
@@ -32,7 +35,8 @@ export function loadConsignors(ids){
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors));
         return consignors;
-      });
+      })
+      .catch(globalErrorize(dispatch));
   }
 }
 

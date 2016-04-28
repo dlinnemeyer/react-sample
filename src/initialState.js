@@ -10,5 +10,8 @@ export const initialState = {
         items: false
       }
     }
+  },
+  error: {
+    global: ""
   }
 };

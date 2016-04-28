@@ -1,10 +1,8 @@
 import React from 'react';
-import PureRenderMixin from 'react-addons-pure-render-mixin';
 import {connect} from 'react-redux';
 import BasicStats from './BasicStats';
 
 export const Dashboard = React.createClass({
-  mixins: [PureRenderMixin],
   render: function() {
     return <div>
       <p>This is the dashboard!</p>
