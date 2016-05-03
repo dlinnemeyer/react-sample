@@ -41,9 +41,9 @@ export function loadConsignors(ids){
   }
 }
 
-export function searchConsignors(data){
+export function searchConsignors(data, sortBy){
   return dispatch => {
-    return consignors.search(data)
+    return consignors.search(data, sortBy)
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors));
         return consignors;

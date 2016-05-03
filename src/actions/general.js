@@ -15,3 +15,11 @@ export function error(id, message){
     message
   }
 }
+
+export function updatePageData(id, data){
+  return {
+    type: "SET_PAGE_DATA",
+    id,
+    data
+  }
+}
