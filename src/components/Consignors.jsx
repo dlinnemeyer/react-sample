@@ -6,6 +6,7 @@ import {Link} from 'react-router';
 import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors, searchConsignors} from '../actions/consignors.js';
 import {loading, updatePageData} from '../actions/general.js';
 import InnerLoading from './InnerLoading'
+import Pagination from './Pagination'
 
 const loadingId = "consignorslist";
 
@@ -36,16 +37,32 @@ export const Consignors = React.createClass({
     return this.loadConsignors(data);
   },
 
-  loadConsignors(data, sortBy){
+  loadConsignors(data, sortBy, page){
     if(!data) data = this.props.filterConsignorList || {};
     if(!sortBy) sortBy = this.props.pageData.sortBy;
+    if(!page) page = this.props.pageData.page;
+
+    // TODO: this should be a parameter, too
+    const perPage = 20;
 
     this.props.loading(loadingId, true);
     return this.props.searchConsignors(data, sortBy)
       .then(consignors => {
-        this.props.updatePageData(loadingId, {ids: Object.keys(consignors)});
+        const ids = Object.keys(consignors);
+        const start = (page - 1) * perPage;
+        const end = start + perPage;
+        this.props.updatePageData(loadingId, {
+          ids: ids.slice(start, end),
+          pages: Math.ceil(ids.length / perPage),
+          count: ids.length
+        });
         this.props.loading(loadingId, false);
       });
+  },
+
+  paginate(page){
+    this.props.updatePageData(loadingId, {page});
+    this.loadConsignors(undefined, undefined, page);
   },
 
   sort(sortBy){
@@ -55,8 +72,10 @@ export const Consignors = React.createClass({
 
   render() {
     const {
-      isLoading, consignors, addFakeConsignors, deleteAllConsignors
+      isLoading, consignors, addFakeConsignors, deleteAllConsignors,
+      pageData
     } = this.props;
+
     const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
     const _deleteAllConsignors = e => { e.preventDefault(); deleteAllConsignors(); }
     return <div>
@@ -66,17 +85,22 @@ export const Consignors = React.createClass({
       <ConsignorListFilter onSubmit={this.onFilterSubmit} refs='filterConsignorsForm' />
       {isLoading
         ? <InnerLoading />
-        : <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor}
-            sort={this.sort} />}
+        : (<div>
+            <Pagination total={pageData.count} pages={pageData.pages} page={pageData.page} onPage={this.paginate} />
+            <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor}
+            sort={this.sort} />
+          </div>)}
     </div>;
   }
 });
 
 function mapStateToProps(state){
   // we'll need pagination at some point. for now, just grad consignorids resulting from the search?
-  const pageData = Object.assign({}, state.pages[loadingId] || {});
-  if(!pageData.ids) pageData.ids = [];
-  if(!pageData.sortBy) pageData.sortBy = "displayName";
+  const pageData = Object.assign({
+    ids: [],
+    sortBy: "displayName",
+    page: 1
+  }, state.pages[loadingId] || {});
 
   const consignors = {};
   pageData.ids.forEach(function(id){
