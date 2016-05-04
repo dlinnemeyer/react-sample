@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import {range} from 'lodash/fp';
 
 const Pagination = React.createClass({
   paginate(event, page){
@@ -8,13 +9,14 @@ const Pagination = React.createClass({
 
   render(){
     const { pages, page, total } = this.props;
-    console.log(pages, page, total);
     return <div className="pagination">
-      <span className="totalCount">{total}</span>{" "}
-      {[...Array(pages)].map((k, i) => {
-        <a href='#' onClick={e => paginate(e, i)} className={i == page ? "selected" : ""}>
-          {i}
-        </a>
+      <span className="totalCount">Total: {total}</span>{" "}
+      {range(1,pages + 1).map((i) => {
+        return i == page
+          ? <span style={{fontWeight: "bold"}} key={i}>{i}</span>
+          : (<a href='#' onClick={e => this.paginate(e, i)} key={i}>
+              {i}
+            </a>);
       })}
     </div>;
   }

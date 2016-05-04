@@ -7,6 +7,8 @@ import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors,
 import {loading, updatePageData} from '../actions/general.js';
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
+import {browserHistory} from 'react-router'
+import * as qs from 'qs'
 
 const loadingId = "consignorslist";
 
@@ -32,18 +34,18 @@ export const Consignors = React.createClass({
   },
 
   onFilterSubmit(data, dispatch){
-    // TODO: this will need to get more elaborate with pagination (totalResults, offset, etc.)
-    // once other elements start searching consignors, this will likely need a namespace
+    // TODO: push the data up to query string. define this.setUserSettings, which calls this.loadConsignors()?
     return this.loadConsignors(data);
   },
 
   loadConsignors(data, sortBy, page){
+    // TODO: default data should be this.props.userSettings? page should also be in usersettings? same with sortby?
     if(!data) data = this.props.filterConsignorList || {};
     if(!sortBy) sortBy = this.props.pageData.sortBy;
     if(!page) page = this.props.pageData.page;
 
     // TODO: this should be a parameter, too
-    const perPage = 20;
+    const perPage = 30;
 
     this.props.loading(loadingId, true);
     return this.props.searchConsignors(data, sortBy)
@@ -51,6 +53,7 @@ export const Consignors = React.createClass({
         const ids = Object.keys(consignors);
         const start = (page - 1) * perPage;
         const end = start + perPage;
+        // TODO: change this? updating derived/async page data
         this.props.updatePageData(loadingId, {
           ids: ids.slice(start, end),
           pages: Math.ceil(ids.length / perPage),
@@ -61,11 +64,13 @@ export const Consignors = React.createClass({
   },
 
   paginate(page){
+    // TODO: call this.setUserSettings
     this.props.updatePageData(loadingId, {page});
     this.loadConsignors(undefined, undefined, page);
   },
 
   sort(sortBy){
+    // TODO: call this.setUserSettings
     this.props.updatePageData(loadingId, {sortBy});
     this.loadConsignors(undefined, sortBy);
   },
@@ -88,19 +93,21 @@ export const Consignors = React.createClass({
         : (<div>
             <Pagination total={pageData.count} pages={pageData.pages} page={pageData.page} onPage={this.paginate} />
             <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor}
-            sort={this.sort} />
+              sort={this.sort} />
           </div>)}
     </div>;
   }
 });
 
-function mapStateToProps(state){
-  // we'll need pagination at some point. for now, just grad consignorids resulting from the search?
+function mapStateToProps(state, props){
+  // pageData is for internal async data and derived data? query string for user-chosen options?
+  // I'd imagine this will be a common pattern?
   const pageData = Object.assign({
-    ids: [],
-    sortBy: "displayName",
-    page: 1
+    ids: []
   }, state.pages[loadingId] || {});
+  const userSettings = Object.assign({
+    page: 1
+  }, props.location.query || {});
 
   const consignors = {};
   pageData.ids.forEach(function(id){
@@ -108,14 +115,12 @@ function mapStateToProps(state){
   });
 
   return {
-    consignors: consignors,
-    pageData: pageData,
-    isLoading: state.loading[loadingId],
-    // hijack the form data. HACK: we should probably actually connect this container to reduxform?
-    // and just have the listfilter thingy handle displaying the fields and things?
-    // that way we have access to the data? or we could just store the data changes in the query
-    // string, and always pull from the query string when loading consignors?
-    filterConsignorList: state.form.filterConsignorList
+    consignors,
+    pageData,
+    userSettings,
+    // Maybe a HACK? on initial load, loading isn't yet set to true, but we haven't retrieved data.
+    // so just set to true in the absence of a loading value in state
+    isLoading: loadingId in state.loading ? state.loading[loadingId] : true
   };
 }
 
