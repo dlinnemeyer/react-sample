@@ -75,12 +75,20 @@ function searchCompare(data, consignor){
 }
 
 function fieldCompare(search, value){
+  // simple stuff
+  if(!search || !search.length || search == value) return true;
+
+  // booleans
+  if(util.isBoolean(value)){
+    const approvedValues = value ? [true, "1", "true", 1] : [false, "0", "false", 0];
+    return approvedValues.indexOf(search) !== -1;
+  }
+
+  // otherwise, just do string comparison. simple enough, since this code will be replaced by server
+  // stuff anyway
   search = search ? search.toString() : "";
   value = value ? value.toString() : "";
-  return !search
-    || !search.length
-    || search == value
-    || value.toLowerCase().indexOf(search.toLowerCase()) !== -1;
+  return value.toLowerCase().indexOf(search.toLowerCase()) !== -1;
 }
 
 export function add(consignor){

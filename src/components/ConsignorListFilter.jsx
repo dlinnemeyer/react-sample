@@ -26,10 +26,12 @@ const ConsignorListFilter = React.createClass({
         <input type="text" placeholder="Company" {...company} />
       </p>
       <p>
-        <label>
-          <input type="checkbox" {...isStoreAccount} />
-          Store Account
-        </label>
+        <label>Store Account</label>
+        <select name="isStoreAccount" {...isStoreAccount} value={isStoreAccount.value || ''}>
+          <option></option>
+          <option value='1'>Yes</option>
+          <option value='0'>No</option>
+        </select>
         <input type="text" placeholder="Split" {...defaultPercSplit} />
         <input type="text" placeholder="Address" {...address} />
         <input type="text" placeholder="Address 2" {...address2} />

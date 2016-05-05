@@ -9,6 +9,7 @@ import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
 import {browserHistory} from 'react-router'
 import * as qs from 'qs'
+import {isEqual} from 'lodash/fp'
 
 const loadingId = "consignorslist";
 
@@ -29,26 +30,39 @@ export const Consignors = React.createClass({
       .then(consignor => this.props.loading(loadingId, false));
   },
 
+  // TODO: maybe replace this sort of thing with an "action" in general that pushes a query
+  // string to the current url?
+  setUserSettings(data){
+    const queryParams = Object.assign({}, this.props.userSettings, data);
+    let queryString = qs.stringify(queryParams);
+    if(queryString.length) queryString = "?"+queryString;
+
+    browserHistory.push('/consignors'+queryString);
+    this.loadConsignors(queryParams);
+  },
+
   componentWillMount(){
     this.loadConsignors();
   },
 
-  onFilterSubmit(data, dispatch){
-    // TODO: push the data up to query string. define this.setUserSettings, which calls this.loadConsignors()?
-    return this.loadConsignors(data);
+  componentWillReceiveProps(){
+    this.loadConsignors();
   },
 
-  loadConsignors(data, sortBy, page){
-    // TODO: default data should be this.props.userSettings? page should also be in usersettings? same with sortby?
-    if(!data) data = this.props.filterConsignorList || {};
-    if(!sortBy) sortBy = this.props.pageData.sortBy;
-    if(!page) page = this.props.pageData.page;
+  lastSettingsLoad: undefined,
+
+  loadConsignors(settings){
+    if(!settings) settings = this.props.userSettings || {};
+    if(isEqual(this.lastSettingsLoad, settings)) return Promise.resolve();
+
+    this.lastSettingsLoad = settings;
+    const { filters, sortBy, page } = settings;
 
     // TODO: this should be a parameter, too
     const perPage = 30;
 
     this.props.loading(loadingId, true);
-    return this.props.searchConsignors(data, sortBy)
+    return this.props.searchConsignors(filters, sortBy)
       .then(consignors => {
         const ids = Object.keys(consignors);
         const start = (page - 1) * perPage;
@@ -63,35 +77,36 @@ export const Consignors = React.createClass({
       });
   },
 
+  onFilterSubmit(data){
+    this.setUserSettings({filters: data});
+  },
+
   paginate(page){
-    // TODO: call this.setUserSettings
-    this.props.updatePageData(loadingId, {page});
-    this.loadConsignors(undefined, undefined, page);
+    this.setUserSettings({page});
   },
 
   sort(sortBy){
-    // TODO: call this.setUserSettings
-    this.props.updatePageData(loadingId, {sortBy});
-    this.loadConsignors(undefined, sortBy);
+    this.setUserSettings({sortBy});
   },
 
   render() {
     const {
       isLoading, consignors, addFakeConsignors, deleteAllConsignors,
-      pageData
+      pageData, userSettings
     } = this.props;
 
     const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
     const _deleteAllConsignors = e => { e.preventDefault(); deleteAllConsignors(); }
     return <div>
       <Link to="/consignors/new">Add Consignor</Link><br />
+      <Link to={{pathname: "/consignors", query: {"filters[isStoreAccount]": "1"}}}>Store Accounts</Link><br />
       <a href="#" onClick={_addFakeConsignors}>Add Lots O' Consignors</a><br />
       <a href="#" onClick={_deleteAllConsignors}>Delete All</a>
-      <ConsignorListFilter onSubmit={this.onFilterSubmit} refs='filterConsignorsForm' />
+      <ConsignorListFilter initialValues={userSettings.filters} onSubmit={this.onFilterSubmit} refs='filterConsignorsForm' />
       {isLoading
         ? <InnerLoading />
         : (<div>
-            <Pagination total={pageData.count} pages={pageData.pages} page={pageData.page} onPage={this.paginate} />
+            <Pagination total={pageData.count} pages={pageData.pages} page={parseInt(userSettings.page)} onPage={this.paginate} />
             <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor}
               sort={this.sort} />
           </div>)}
@@ -105,9 +120,14 @@ function mapStateToProps(state, props){
   const pageData = Object.assign({
     ids: []
   }, state.pages[loadingId] || {});
+  const queryParams = props.location.search.length
+    ? qs.parse(props.location.search.slice(1))
+    : {};
   const userSettings = Object.assign({
-    page: 1
-  }, props.location.query || {});
+    page: "1",
+    sortBy: "displayName",
+    filters: {}
+  }, queryParams);
 
   const consignors = {};
   pageData.ids.forEach(function(id){
