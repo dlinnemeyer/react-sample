@@ -1,10 +1,11 @@
 // just mark an arbitrary loading boolean by an id string. used by components to mark themselves
 // as loading
-export function loading(id, isLoading){
+export function loading(id, subId = "_", isLoading){
   return {
-    type: 'LOADING',
+    type: 'COMPONENT_LOADING',
     isLoading,
-    id
+    id,
+    subId
   }
 }
 
@@ -16,10 +17,11 @@ export function error(id, message){
   }
 }
 
-export function updatePageData(id, data){
+export function updateComponentData(id, subId = "_", data){
   return {
-    type: "SET_PAGE_DATA",
+    type: "COMPONENT_DATA",
     id,
+    subId,
     data
   }
 }

@@ -4,14 +4,12 @@ import ConsignorList from './ConsignorList';
 import ConsignorListFilter from './ConsignorListFilter';
 import {Link} from 'react-router';
 import {loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors, searchConsignors} from '../actions/consignors.js';
-import {loading, updatePageData} from '../actions/general.js';
+import {loading, updateComponentData} from '../actions/general.js';
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
 import {browserHistory} from 'react-router'
 import * as qs from 'qs'
 import {isEqual} from 'lodash/fp'
-
-const loadingId = "consignorslist";
 
 export const Consignors = React.createClass({
   deleteConsignor(consignor){
@@ -25,9 +23,9 @@ export const Consignors = React.createClass({
     // That would store true/false in loading.deleteConsignor[id] in the state.
     // It could also return a promise that passes along the values from deleteConsignor, so you
     // could still chain on it
-    this.props.loading(loadingId, true);
+    this.props.loading(this.props.componentId, true);
     this.props.deleteConsignor(consignor)
-      .then(consignor => this.props.loading(loadingId, false));
+      .then(consignor => this.props.loading(this.props.componentId, false));
   },
 
   // TODO: maybe replace this sort of thing with an "action" in general that pushes a query
@@ -46,6 +44,7 @@ export const Consignors = React.createClass({
   },
 
   componentWillReceiveProps(){
+    console.log(this.props.search);
     this.loadConsignors();
   },
 
@@ -58,23 +57,7 @@ export const Consignors = React.createClass({
     this.lastSettingsLoad = settings;
     const { filters, sortBy, page } = settings;
 
-    // TODO: this should be a parameter, too
-    const perPage = 30;
-
-    this.props.loading(loadingId, true);
-    return this.props.searchConsignors(filters, sortBy)
-      .then(consignors => {
-        const ids = Object.keys(consignors);
-        const start = (page - 1) * perPage;
-        const end = start + perPage;
-        // TODO: change this? updating derived/async page data
-        this.props.updatePageData(loadingId, {
-          ids: ids.slice(start, end),
-          pages: Math.ceil(ids.length / perPage),
-          count: ids.length
-        });
-        this.props.loading(loadingId, false);
-      });
+    return this.props.search.load(filters, sortBy, {perPage: 30, page});
   },
 
   onFilterSubmit(data){
@@ -91,8 +74,8 @@ export const Consignors = React.createClass({
 
   render() {
     const {
-      isLoading, consignors, addFakeConsignors, deleteAllConsignors,
-      pageData, userSettings
+      search, consignors, addFakeConsignors, deleteAllConsignors,
+      userSettings
     } = this.props;
 
     const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
@@ -103,10 +86,10 @@ export const Consignors = React.createClass({
       <a href="#" onClick={_addFakeConsignors}>Add Lots O' Consignors</a><br />
       <a href="#" onClick={_deleteAllConsignors}>Delete All</a>
       <ConsignorListFilter initialValues={userSettings.filters} onSubmit={this.onFilterSubmit} refs='filterConsignorsForm' />
-      {isLoading
+      {search.loading
         ? <InnerLoading />
         : (<div>
-            <Pagination total={pageData.count} pages={pageData.pages} page={parseInt(userSettings.page)} onPage={this.paginate} />
+            <Pagination total={search.data.count} pages={search.data.pages} page={parseInt(userSettings.page)} onPage={this.paginate} />
             <ConsignorList consignors={consignors} deleteConsignor={this.deleteConsignor}
               sort={this.sort} />
           </div>)}
@@ -114,12 +97,54 @@ export const Consignors = React.createClass({
   }
 });
 
+function asyncify(Component, componentId, channels = {}){
+  const wrapper = React.createClass({
+    render(){
+      return <Component {...this.props} />;
+    }
+  });
+
+  function asyncWrap(func, componentId, channelId){
+    return (...args) => {
+      const async = func(...args);
+
+      return dispatch => {
+        dispatch(loading(componentId, subComponentId, true));
+        return async(dispatch)
+          .then((data) => {
+            console.log(data);
+            dispatch(updateComponentData(componentId, subComponentId, data));
+            return data;
+          })
+          .then(() => dispatch(loading(componentId, subComponentId, false)))
+          .catch(globalErrorize(dispatch));
+          // catch other errors and dispatch loading action?
+      }
+    }
+  }
+
+  function mapStateToProps(state, _props){
+    const component = state.components[componentId] || {};
+
+    const props = {componentId};
+    // TODO: each channel should have a root-level prop for loading, data, error, etc.
+    Object.keys(channels).forEach(ch => {
+      const channel = channels[ch];
+      props[ch] = Object.assign(channel.defaults, component[ch]);
+
+      // wrap async function for them
+      if(channel.load) props[ch].load = (...args) => _props.dispatch(asyncWrap(channel.load, componentId, ch)(...args));
+    });
+
+    // TODO: add some global things, like isAnyLoading, isAnyErrors, etc.?
+
+    return props;
+  }
+
+  return connect(mapStateToProps)(wrapper);
+}
+
 function mapStateToProps(state, props){
-  // pageData is for internal async data and derived data? query string for user-chosen options?
-  // I'd imagine this will be a common pattern?
-  const pageData = Object.assign({
-    ids: []
-  }, state.pages[loadingId] || {});
   const queryParams = props.location.search.length
     ? qs.parse(props.location.search.slice(1))
     : {};
@@ -130,20 +155,20 @@ function mapStateToProps(state, props){
   }, queryParams);
 
   const consignors = {};
-  pageData.ids.forEach(function(id){
+  (props.search.data.ids || []).forEach(id => {
     consignors[id] = state.consignors[id];
   });
 
   return {
     consignors,
-    pageData,
-    userSettings,
-    // Maybe a HACK? on initial load, loading isn't yet set to true, but we haven't retrieved data.
-    // so just set to true in the absence of a loading value in state
-    isLoading: loadingId in state.loading ? state.loading[loadingId] : true
+    userSettings
   };
 }
 
-export const ConsignorsContainer = connect(mapStateToProps, {
-  deleteConsignor, loading, addFakeConsignors, deleteAllConsignors, searchConsignors, updatePageData
+const ReduxedConsignors = connect(mapStateToProps, {
+  deleteConsignor, loading, addFakeConsignors, deleteAllConsignors
 })(Consignors);
+
+export const ConsignorsContainer = asyncify(ReduxedConsignors, "consignorslist", {
+  "search": {defaults: {data: {ids: []}, loading: true}, load: searchConsignors}
+});

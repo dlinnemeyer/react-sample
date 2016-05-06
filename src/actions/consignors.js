@@ -1,5 +1,5 @@
 import * as consignors from "../data/consignors"
-import {globalErrorize} from "./misc"
+import {globalErrorize, asyncWrap} from "./misc"
 import faker from "faker"
 
 export function addConsignor(consignor){
@@ -41,14 +41,26 @@ export function loadConsignors(ids){
   }
 }
 
-export function searchConsignors(data, sortBy){
+export function searchConsignors(data, sortBy, pagination){
+  const { page, perPage } = pagination;
   return dispatch => {
     return consignors.search(data, sortBy)
       .then(consignors => {
+        // TODO: not sure if this is worth abstracting? could at least make a generic
+        // loadModels("consignor", consignors)?
         dispatch(loadConsignorsAction(consignors));
-        return consignors;
-      })
-      .catch(globalErrorize(dispatch));
+
+        const ids = Object.keys(consignors);
+        const start = (page - 1) * perPage;
+        const end = start + perPage;
+        // TODO: change this? updating derived/async page data
+        return {
+          ids: ids.slice(start, end),
+          // consignors: ..., should include consignors. just makes things easier on the component end
+          pages: Math.ceil(ids.length / perPage),
+          count: ids.length
+        };
+      });
   }
 }
 
