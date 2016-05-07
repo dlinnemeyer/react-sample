@@ -2,6 +2,7 @@ import {promiseDelay} from './misc'
 import store from 'store'
 import {arrToHash} from '../misc'
 import {__getConsignors, __setConsignors} from './consignors'
+import {isUndefined} from 'util'
 
 export function __getItems(){
   return store.get("items") || {};
@@ -11,12 +12,12 @@ export function __setItems(items){
   return store.set("items", items);
 }
 
-export function getAll(ids, state){
+export function getAll(ids){
   return promiseDelay((resolve, reject) => {
     const allItems = __getItems();
-    const items = ids
-      ? arrToHash(ids.map(id => allItems[id]).filter(c => !!(c)))
-      : allItems;
+    const items = isUndefined(ids)
+      ? allItems
+      : arrToHash(ids.map(id => allItems[id]).filter(c => !!(c)));
     resolve(items);
   });
 }

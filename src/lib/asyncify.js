@@ -53,9 +53,9 @@ export function asyncWrap(func, componentId, channelId){
       return getMeMyPromise(dispatch)
         .then((response) => {
           dispatch(data(componentId, channelId, response));
+          dispatch(loading(componentId, channelId, false));
           return response;
-        })
-        .then(() => dispatch(loading(componentId, channelId, false)));
+        });
     }
   }
 }

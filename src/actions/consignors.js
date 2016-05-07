@@ -30,14 +30,23 @@ export function deleteConsignor(consignor){
   }
 }
 
+export function loadConsignor(id){
+  return (dispatch) => {
+    return consignors.getAll([id])
+      .then(consignors => {
+        dispatch(loadConsignorsAction(consignors));
+        return consignors[id];
+      });
+  }
+}
+
 export function loadConsignors(ids){
   return (dispatch) => {
     return consignors.getAll(ids)
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors));
         return consignors;
-      })
-      .catch(globalErrorize(dispatch));
+      });
   }
 }
 

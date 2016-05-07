@@ -56,8 +56,7 @@ export function loadItems(ids){
       .then(items => {
         dispatch(loadItemsAction(items));
         return items;
-      })
-      .catch(globalErrorize(dispatch));
+      });
   }
 }
 
