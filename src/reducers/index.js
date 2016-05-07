@@ -7,9 +7,9 @@ import {reducer} from '../lib/asyncify'
 // just export the object of reducer functions. we'll call combineReducers in index.jsx so we can
 // add global reducers from plugins
 export default {
+  components: reducer,
   consignors,
   items,
   loading,
-  error,
-  components: reducer
+  error
 }

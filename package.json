@@ -26,6 +26,7 @@
     "redux-immutable-state-invariant": "^1.2.2"
   },
   "dependencies": {
+    "history": "^2.1.1",
     "immutable": "^3.7.6",
     "lodash": "^4.11.2",
     "qs": "^6.1.0",

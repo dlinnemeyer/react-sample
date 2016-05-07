@@ -3,25 +3,25 @@ import {connect} from 'react-redux';
 import ConsignorList from './ConsignorList';
 import ConsignorListFilter from './ConsignorListFilter';
 import {Link} from 'react-router';
-import {
-  loadConsignors, deleteConsignor, deleteAllConsignors, addFakeConsignors, searchConsignors
-} from '../actions/consignors.js';
+import {deleteConsignor, deleteAllConsignors, addFakeConsignors, searchConsignors}
+  from '../actions/consignors.js';
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
-import {browserHistory} from 'react-router'
-import * as qs from 'qs'
 import {isEqual} from 'lodash/fp'
-import {asyncify} from '../lib/asyncify.js'
+import {asyncify} from '../lib/asyncify'
+import {push, getQuery} from '../misc'
 
 export const Consignors = React.createClass({
 
-  setUserSettings(data){
-    const queryParams = Object.assign({}, this.props.userSettings, data);
-    let queryString = qs.stringify(queryParams);
-    if(queryString.length) queryString = "?"+queryString;
+  deleteConsignor(id){
+    this.props.deleteConsignor.load(id)
+      .then(() => this.loadConsignors(undefined, true));
+  },
 
-    browserHistory.push('/consignors'+queryString);
-    this.loadConsignors(queryParams);
+  setUserSettings(data){
+    const query = Object.assign({}, this.props.userSettings, data);
+    push({pathname: '/consignors', query});
+    this.loadConsignors(query);
   },
 
   componentWillMount(){
@@ -34,9 +34,9 @@ export const Consignors = React.createClass({
 
   lastSettingsLoad: undefined,
 
-  loadConsignors(settings){
+  loadConsignors(settings, force = false){
     if(!settings) settings = this.props.userSettings || {};
-    if(isEqual(this.lastSettingsLoad, settings)) return Promise.resolve();
+    if(!force && isEqual(this.lastSettingsLoad, settings)) return Promise.resolve();
 
     this.lastSettingsLoad = settings;
     const { filters, sortBy, page } = settings;
@@ -56,11 +56,12 @@ export const Consignors = React.createClass({
     this.setUserSettings({sortBy});
   },
 
+  anyLoading(){
+    return this.props.search.loading || this.props.deleteConsignor.loading;
+  },
+
   render() {
-    const {
-      search, consignors, addFakeConsignors, deleteAllConsignors,
-      userSettings
-    } = this.props;
+    const {search, consignors, addFakeConsignors, deleteAllConsignors, userSettings} = this.props;
 
     const _addFakeConsignors = e => { e.preventDefault(); addFakeConsignors(); }
     const _deleteAllConsignors = e => { e.preventDefault(); deleteAllConsignors(); }
@@ -70,7 +71,7 @@ export const Consignors = React.createClass({
       <a href="#" onClick={_addFakeConsignors}>Add Lots O' Consignors</a><br />
       <a href="#" onClick={_deleteAllConsignors}>Delete All</a>
       <ConsignorListFilter initialValues={userSettings.filters} onSubmit={this.onFilterSubmit} refs='filterConsignorsForm' />
-      {search.loading
+      {this.anyLoading()
         ? <InnerLoading />
         : (<div>
             <Pagination total={search.data.count} pages={search.data.pages} page={parseInt(userSettings.page)} onPage={this.paginate} />
@@ -83,19 +84,13 @@ export const Consignors = React.createClass({
 
 
 function mapStateToProps(state, props){
-  const queryParams = props.location.search.length
-    ? qs.parse(props.location.search.slice(1))
-    : {};
   const userSettings = Object.assign({
     page: "1",
     sortBy: "displayName",
     filters: {}
-  }, queryParams);
+  }, getQuery(props.location));
 
-  const consignors = {};
-  (props.search.data.ids || []).forEach(id => {
-    consignors[id] = state.consignors[id];
-  });
+  const consignors = props.search.data.ids.map(id => state.consignors[id]);
 
   return {
     consignors,
@@ -108,5 +103,6 @@ const ReduxedConsignors = connect(mapStateToProps, {
 })(Consignors);
 
 export const ConsignorsContainer = asyncify(ReduxedConsignors, "consignorslist", {
-  "search": { data: {ids: []}, loading: true, load: searchConsignors }
+  "search": { data: {ids: []}, loading: true, load: searchConsignors },
+  "deleteConsignor": { load: deleteConsignor }
 });

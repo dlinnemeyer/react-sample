@@ -41,8 +41,7 @@ export function loadConsignors(ids){
   }
 }
 
-export function searchConsignors(data, sortBy, pagination){
-  const { page, perPage } = pagination;
+export function searchConsignors(data, sortBy, {page, perPage}){
   return dispatch => {
     return consignors.search(data, sortBy)
       .then(consignors => {
