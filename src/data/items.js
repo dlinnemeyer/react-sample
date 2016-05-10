@@ -2,7 +2,7 @@ import {promiseDelay} from './misc'
 import store from 'store'
 import {arrToHash} from '../misc'
 import {__getConsignors, __setConsignors} from './consignors'
-import {isUndefined, isNumber, isBoolean} from 'util'
+import {isUndefined, isNumber, isBoolean, toString} from 'lodash'
 
 export function __getItems(){
   return store.get("items") || {}
@@ -24,7 +24,7 @@ export function getAll(ids){
 
 export function add(item){
   return promiseDelay((resolve, reject) => {
-    if(!item.id) item.id = (Math.floor(Math.random() * 1000000)) + ""
+    if(!item.id) item.id = toString(Math.floor(Math.random() * 1000000))
 
     const items = __getItems()
     const skus = Object.keys(items).map(id => items[id].sku)
@@ -98,19 +98,19 @@ function searchCompare(data, item){
   return match
 }
 
-function fieldCompare(search, value){
+function fieldCompare(query, value){
   // simple stuff
-  if(!search || !search.length || search == value) return true
+  if(!query || !query.length || query == value) return true
 
   // booleans
   if(isBoolean(value)){
     const approvedValues = value ? [true, "1", "true", 1] : [false, "0", "false", 0]
-    return approvedValues.indexOf(search) !== -1
+    return approvedValues.indexOf(query) !== -1
   }
 
   // otherwise, just do string comparison. simple enough, since this code will be replaced by server
   // stuff anyway
-  search = search ? search.toString() : ""
+  query = query ? query.toString() : ""
   value = value ? value.toString() : ""
-  return value.toLowerCase().indexOf(search.toLowerCase()) !== -1
+  return value.toLowerCase().indexOf(query.toLowerCase()) !== -1
 }

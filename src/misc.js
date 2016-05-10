@@ -1,6 +1,6 @@
 import {browserHistory as history} from 'react-router'
-import * as qs from 'qs'
-import {isString} from 'util'
+import {stringify, parse} from 'qs'
+import {isString} from 'lodash'
 
 export function arrToHash(arr, key = "id"){
   return arr.reduce((obj, x) => {
@@ -17,13 +17,13 @@ export function push(location){
   if(isString(location)) return history.push(location)
 
   const { pathname, query } = location
-  let querystring = qs.stringify(query)
-  if(querystring.length) querystring = "?" + querystring
+  let querystring = stringify(query)
+  if(querystring.length) querystring = `?${querystring}`
   return history.push(pathname + querystring)
 }
 
 export function getQuery(location){
   return location.search.length
-    ? qs.parse(location.search.slice(1))
+    ? parse(location.search.slice(1))
     : {}
 }

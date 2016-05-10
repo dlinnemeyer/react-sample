@@ -9,7 +9,7 @@ function loadConsignors(state, consignors){
 }
 
 function deleteConsignor(state, consignor){
-  let newState = Object.assign({}, state)
+  const newState = Object.assign({}, state)
   delete newState[consignor.id]
   return newState
 }
@@ -19,7 +19,7 @@ function addItemMapping(state, item){
   // nicely with other libraries. WHAT TO DO?!?! There must be some nice functional library
   // out there that offers quick immutable mutation functions? react update helper looked
   // alright, but a little weird (http://facebook.github.io/react/docs/update.html)
-  let consignor = Object.assign({}, state[item.consignorid])
+  const consignor = Object.assign({}, state[item.consignorid])
   if(!consignor) return state
 
   consignor.items = consignor.items ? [...consignor.items, item.id] : [item.id]
@@ -29,7 +29,7 @@ function addItemMapping(state, item){
 }
 
 function deleteItemMapping(state, item){
-  let consignor = Object.assign({}, state[item.consignorid])
+  const consignor = Object.assign({}, state[item.consignorid])
   if(!consignor) return state
 
   consignor.items = consignor.items.filter(id => id !== item.id)

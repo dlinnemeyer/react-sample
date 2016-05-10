@@ -23,13 +23,13 @@ import {globalErrorize} from "./misc"
 // Then again, as we build out app functionality, we might notice more divergence?
 // And to be fair, the main repetition is in the thunk structure.
 
-export function addItem(item){
+export function addItem(data){
   return (dispatch) => {
     // We don't bother with error handling on this promise. We don't have any global error handling
     // to do, and components actually calling this action can catch errors.
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
-    return add(item)
+    return add(data)
       .then(item => {
         dispatch(addItemAction(item))
         // in case anyone else is chaining on this? though they probably shouldn't, since
@@ -40,9 +40,9 @@ export function addItem(item){
   }
 }
 
-export function deleteItem(item){
+export function deleteItem(data){
   return (dispatch) => {
-    return del(item)
+    return del(data)
       .then(item => {
         dispatch(deleteItemAction(item))
         return item
@@ -83,7 +83,7 @@ export function searchItems(data, sortBy, {page, perPage}){
 
         const start = (page - 1) * perPage
         const end = start + perPage
-        const ids = Object.keys(items).slice(start,end)
+        const ids = Object.keys(items).slice(start, end)
         return {
           items: filter(items, i => includes(ids, i.id)),
           pages: Math.ceil(ids.length / perPage),
@@ -99,14 +99,14 @@ export function addFakeItems(num = 50){
   const consignors =__getConsignors()
   let i = 0
   while(num > i){
-    let item = fakeItem()
+    const item = fakeItem()
     newItems[item.id] = item
 
-    let consignor = faker.random.objectElement(consignors)
+    const consignor = faker.random.objectElement(consignors)
     item.consignorid = consignor.id
     consignor.items.push(item.id)
 
-    i++
+    i = i + 1
   }
   __setItems(Object.assign({},
     __getItems(),
@@ -135,7 +135,7 @@ function fakeItem(){
     let results = ""
     while(n > i){
       results += func()
-      i++
+      i = i + 1
     }
     return results
   }
@@ -143,12 +143,12 @@ function fakeItem(){
     id: faker.random.uuid(),
     sku: times(16, faker.random.alphaNumeric),
     title: faker.commerce.product(),
-    brand: random(8,faker.company.companyName()),
+    brand: random(8, faker.company.companyName()),
     color: random(8, faker.commerce.color()),
     size: random(8, times(2, faker.random.alphaNumeric)),
     description: random(8, faker.commerce.productName()),
     percSplit: faker.random.number(100),
-    price: faker.commerce.price(0,priceMax)
+    price: faker.commerce.price(0, priceMax)
   }
 }
 

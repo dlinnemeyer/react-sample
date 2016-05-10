@@ -25,7 +25,7 @@ export function asyncify(Component, componentId, channels = {}){
     const props = {componentId}
     Object.keys(channels).forEach(ch => {
       const channel = channels[ch]
-      props[ch] = Object.assign({data: {}, loading: false, errors: undefined}, channel, component[ch])
+      props[ch] = Object.assign({data: {}, loading: false, error: {}}, channel, component[ch])
     })
 
     // TODO: add some global things, like isAnyLoading, isAnyErrors, etc.?
@@ -52,7 +52,7 @@ export function asyncWrap(func, componentId, channelId){
       dispatch(loading(componentId, channelId, true))
       return getMeMyPromise(dispatch)
         .then((response) => {
-          dispatch(data(componentId, channelId, response))
+          dispatch(setData(componentId, channelId, response))
           dispatch(loading(componentId, channelId, false))
           return response
         })
@@ -77,7 +77,7 @@ function loading(id, subId = "_", isLoading){
 //   }
 // }
 
-function data(id, subId = "_", data){
+function setData(id, subId = "_", data){
   return {
     type: "COMPONENT_DATA",
     id,

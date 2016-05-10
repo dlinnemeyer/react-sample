@@ -1,11 +1,11 @@
 export function displayName(consignor){
   return consignor.company
     ? consignor.company
-    : consignor.firstName + " " + consignor.lastName
+    : `${consignor.firstName} ${consignor.lastName}`
 }
 
 export function linkPath(consignor){
-  return "/consignors/" + encodeURIComponent(consignor.id)
+  return `/consignors/${encodeURIComponent(consignor.id)}`
 }
 
 

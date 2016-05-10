@@ -2,13 +2,13 @@ import {add, del, getAll, search, __getConsignors, __setConsignors} from "../dat
 import {globalErrorize} from "./misc"
 import faker from "faker"
 
-export function addConsignor(consignor){
+export function addConsignor(data){
   return (dispatch) => {
     // We don't bother with error handling on this promise. We don't have any global error handling
     // to do, and components actually calling this action can catch errors.
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
-    return add(consignor)
+    return add(data)
       .then(consignor => {
         dispatch(addConsignorAction(consignor))
         // in case anyone else is chaining on this? though they probably shouldn't, since
@@ -19,9 +19,9 @@ export function addConsignor(consignor){
   }
 }
 
-export function deleteConsignor(consignor){
+export function deleteConsignor(data){
   return (dispatch) => {
-    return del(consignor)
+    return del(data)
       .then(consignor => {
         dispatch(deleteConsignorAction(consignor))
         return consignor
@@ -76,9 +76,9 @@ export function addFakeConsignors(num = 50){
   const newConsignors = {}
   let i = 0
   while(num > i){
-    let consignor = fakeConsignor()
+    const consignor = fakeConsignor()
     newConsignors[consignor.id] = consignor
-    i++
+    i = i + 1
   }
   __setConsignors(Object.assign({},
     __getConsignors(),
