@@ -15,7 +15,6 @@ export const Item = React.createClass({
   },
 
   componentWillMount(){
-    console.log(this.props);
     this.props.item.load(this.id()).then(item => this.props.consignor.load(item.consignorid));
   },
 
@@ -31,7 +30,7 @@ export const Item = React.createClass({
     return <div>
       {item.loading || consignor.loading
         ? <InnerLoading />
-        : <ItemDetails item={item} consignor={consignor} deleteItem={this.deleteItem} />}
+        : <ItemDetails item={item.data} consignor={consignor.data} deleteItem={this.deleteItem} />}
       {del.loading && <LoadingOverlay />}
     </div>;
   }
@@ -43,7 +42,6 @@ Item.propTypes = {
   del: PropTypes.object.isRequired
 }
 
-console.log(loadConsignor, loadItem);
 export const ItemContainer = asyncify(Item, "item", {
   "consignor": {load: loadConsignor },
   "item": {loading: true, load: loadItem},

@@ -1,4 +1,4 @@
-import * as items from "../data/items"
+import {add, del, getAll, search, __getItems, __setItems} from "../data/items"
 import {__getConsignors, __setConsignors} from "../data/consignors"
 import faker from "faker"
 import {filter, includes} from 'lodash'
@@ -29,7 +29,7 @@ export function addItem(item){
     // to do, and components actually calling this action can catch errors.
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
-    return items.add(item)
+    return add(item)
       .then(item => {
         dispatch(addItemAction(item))
         // in case anyone else is chaining on this? though they probably shouldn't, since
@@ -42,7 +42,7 @@ export function addItem(item){
 
 export function deleteItem(item){
   return (dispatch) => {
-    return items.del(item)
+    return del(item)
       .then(item => {
         dispatch(deleteItemAction(item))
         return item
@@ -53,10 +53,20 @@ export function deleteItem(item){
 
 export function loadItems(ids){
   return (dispatch) => {
-    return items.getAll(ids)
+    return getAll(ids)
       .then(items => {
         dispatch(loadItemsAction(items))
         return items
+      })
+  }
+}
+
+export function loadItem(id){
+  return (dispatch) => {
+    return getAll([id])
+      .then(items => {
+        dispatch(loadItemsAction(items))
+        return items[id]
       })
   }
 }
@@ -65,7 +75,7 @@ export function searchItems(data, sortBy, {page, perPage}){
   if(!page) page = 1
   if(!perPage) perPage = 20
   return dispatch => {
-    return items.search(data, sortBy)
+    return search(data, sortBy)
       .then(items => {
         // TODO: not sure if this is worth abstracting? could at least make a generic
         // loadModels()?
@@ -98,8 +108,8 @@ export function addFakeItems(num = 50){
 
     i++
   }
-  items.__setItems(Object.assign({},
-    items.__getItems(),
+  __setItems(Object.assign({},
+    __getItems(),
     newItems
   ))
   __setConsignors(consignors)
@@ -109,8 +119,8 @@ export function addFakeItems(num = 50){
 
 export function deleteAllItems(){
   return dispatch => {
-    const all = items.__getItems()
-    items.__setItems({})
+    const all = __getItems()
+    __setItems({})
     Object.keys(all).forEach(iid => dispatch(deleteItemAction(all[iid])))
   }
 }
