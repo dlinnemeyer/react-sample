@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default React.createClass({
   render(){
@@ -6,7 +6,7 @@ export default React.createClass({
       <div style={{color: "red", fontSize: "32px", background: "white", padding: "30px", opacity: "1", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}>
         {this.props.message}
       </div>
-    </div>;
+    </div>
   }
-});
+})
 

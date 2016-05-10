@@ -1,58 +1,52 @@
-import React from 'react';
-import {connect, withRouter} from 'react-redux';
-import ItemList from './ItemList';
-import ConsignorListFilter from './ConsignorListFilter';
-import {searchItems, addFakeItems, deleteAllItems} from '../actions/items.js';
-import {loading} from '../actions/general.js';
-import {Link} from 'react-router';
+import React from 'react'
+import {connect} from 'react-redux'
+import ItemList from './ItemList'
+import ConsignorListFilter from './ConsignorListFilter'
+import {searchItems, addFakeItems, deleteAllItems} from '../actions/items'
+import {Link, withRouter} from 'react-router'
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
-import {isEqual} from 'lodash/fp'
+import {pick} from 'lodash/fp'
 import {asyncify} from '../lib/asyncify'
+
+const itemFields = ["id", "sku", "title", "brand", "color", "size", "description",
+  "percSplit", "price"]
 
 export const Items = React.createClass({
 
-  setUserSettings(data){
-    const query = Object.assign({}, this.props.userSettings, data);
-    history.push({pathname: '/consignors', query});
-    this.loadConsignors(query);
-  },
+  loadItems(data){
+    const mergedData = Object.assign({}, this.props.userSettings, data)
 
-  lastSettingsLoad: undefined,
-  loadItems(settings, force = false){
-    if(!settings) settings = this.props.userSettings || {};
-    if(!force && isEqual(this.lastSettingsLoad, settings)) return Promise.resolve();
+    this.props.dispatch({type: "loadItems push", mergedData, data: this.props})
+    this.props.router.push({pathname: '/items', mergedData})
 
-    this.lastSettingsLoad = settings;
+    const { sortBy, page } = mergedData
+    const filters = pick(itemFields, mergedData)
 
-    const { filters, sortBy, page } = settings;
-    return this.props.items.load(filters, sortBy, {perPage: 30, page});
+    this.props.dispatch({type: "loading items", mergedData, data: this.props})
+    return this.props.items.load(filters, sortBy, {perPage: 30, page})
   },
 
   componentWillMount(){
-    this.loadItems();
-  },
-
-  componentWillReceiveProps(){
-    this.loadItems();
+    this.loadItems()
   },
 
   onFilterSubmit(data){
-    this.setUserSettings({filters: data});
+    this.loadItems(data)
   },
 
-  paginate(page){
-    this.setUserSettings({page});
+  paginate(pageNumber){
+    this.loadItems({page: pageNumber})
   },
 
-  sort(sortBy){
-    this.setUserSettings({sortBy});
+  sort(field){
+    this.loadItems({sortBy: field})
   },
 
   render() {
-    const {items, addFakeItems, deleteAllItems, userSettings} = this.props;
-    const _addFakeItems = e => { e.preventDefault(); addFakeItems(); }
-    const _deleteAllItems = e => { e.preventDefault(); deleteAllItems(); }
+    const {items, addFakeItems, deleteAllItems, userSettings} = this.props
+    const _addFakeItems = e => { e.preventDefault(); addFakeItems() }
+    const _deleteAllItems = e => { e.preventDefault(); deleteAllItems() }
     return <div>
       <Link to="/items/new">Add Item</Link><br />
       <Link to={{pathname: "/items", query: {"printed": "0"}}}>Unprinted Items</Link><br />
@@ -60,29 +54,27 @@ export const Items = React.createClass({
       <a href="#" onClick={_deleteAllItems}>Delete All</a>
       {items.loading
         ? <InnerLoading />
-        : <ItemList items={items.data} />}
-    </div>;
+        : <ItemList items={items.data.items} sort={this.sort} />}
+    </div>
   }
 
-});
+})
 
 function mapStateToProps(state, props){
   const userSettings = Object.assign({
     page: "1",
-    sortBy: "sku",
-    filters: {}
-  }, props.location.query);
-
-  const consignors = props.search.data.ids.map(id => state.consignors[id]);
+    sortBy: "sku"
+  }, props.location.query)
 
   return {
-    consignors,
     userSettings
-  };
+  }
 }
 
-const ReduxedItems = connect(mapStateToProps)(withRouter(Items));
+const ReduxedItems = connect(mapStateToProps, {
+  addFakeItems, deleteAllItems
+})(withRouter(Items))
 
-export const ItemsContainer = asyncify(ReduxedConsignors, "itemslist", {
+export const ItemsContainer = asyncify(ReduxedItems, "itemslist", {
   "items": { data: {}, loading: true, load: searchItems }
-});
+})

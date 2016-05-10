@@ -1,15 +1,15 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import BasicStats from './BasicStats';
+import React from 'react'
+import {connect} from 'react-redux'
+import BasicStats from './BasicStats'
 
 export const Dashboard = React.createClass({
   render: function() {
     return <div>
       <p>This is the dashboard!</p>
       <BasicStats consignorCount={this.props.consignorCount} itemCount={this.props.itemCount} />
-    </div>;
+    </div>
   }
-});
+})
 
 function mapStateToProps(state){
   return {
@@ -18,4 +18,4 @@ function mapStateToProps(state){
   }
 }
 
-export const DashboardContainer = connect(mapStateToProps)(Dashboard);
+export const DashboardContainer = connect(mapStateToProps)(Dashboard)

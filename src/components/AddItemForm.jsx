@@ -1,40 +1,39 @@
-import React, {PropTypes} from 'react';
-import {findDOMNode} from 'react-dom';
-import {displayName} from '../models/consignor';
-import {reduxForm} from 'redux-form';
+import React, {PropTypes} from 'react'
+import {displayName} from '../models/consignor'
+import {reduxForm} from 'redux-form'
 
-const fields = ["sku", "consignorid", "title", "brand", "color", "size", "description" ,
-  "percSplit", "price"];
+const fields = ["sku", "consignorid", "title", "brand", "color", "size", "description",
+  "percSplit", "price"]
 const initialValues = {
   percSplit: 50
-};
+}
 
 const validate = values => {
-  const errors = {};
+  const errors = {}
   if(!values.sku){
-    errors.sku = "Required";
+    errors.sku = "Required"
   }
   if(!values.title){
-    errors.title = "Required";
+    errors.title = "Required"
   }
 
   if(!values.percSplit){
-    errors.percSplit = "Required";
+    errors.percSplit = "Required"
   }
-  const percSplit = parseFloat(values.percSplit);
+  const percSplit = parseFloat(values.percSplit)
   if(isNaN(percSplit) || percSplit < 0){
-    errors.percSplit = "That's not a valid percent split.";
+    errors.percSplit = "That's not a valid percent split."
   }
 
   if(!values.price){
-    errors.price = "Required";
+    errors.price = "Required"
   }
-  const price = parseFloat(values.price);
+  const price = parseFloat(values.price)
   if(isNaN(price) || price < 0){
-    errors.price = "That's not a valid price.";
+    errors.price = "That's not a valid price."
   }
 
-  return errors;
+  return errors
 }
 
 const AddItemForm = React.createClass({
@@ -42,7 +41,7 @@ const AddItemForm = React.createClass({
     const {
       fields: { sku, consignorid, title, brand, color, size, description, percSplit, price },
       // redux-form provided helpers
-      error, resetForm, handleSubmit, submitting, submitFailed,
+      error, handleSubmit, submitting, submitFailed,
       // the form's other props
       consignors
     } = this.props
@@ -56,7 +55,7 @@ const AddItemForm = React.createClass({
         <label>Consignor</label>
         <select {...consignorid}>
           {Object.keys(consignors).map(c => {
-            let consignor = consignors[c];
+            const consignor = consignors[c]
             return (
               <option key={consignor.id} value={consignor.id}>{displayName(consignor)}</option>
             )
@@ -90,9 +89,9 @@ const AddItemForm = React.createClass({
         <input type="submit" value="Add Item" disabled={submitting} />
         {submitting && <img src="/img/loading.gif" />}
       </p>
-    </form>;
+    </form>
   }
-});
+})
 
 AddItemForm.propTypes = {
   fields: PropTypes.object.isRequired,
@@ -107,4 +106,4 @@ export default reduxForm({
   fields,
   validate,
   initialValues
-})(AddItemForm);
+})(AddItemForm)

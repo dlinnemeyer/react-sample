@@ -12,6 +12,8 @@ parserOptions:
 plugins:
   - import
   - react
+settings:
+  import/resolver: {node: {extensions: [.jsx, .js]}}
 rules:
   no-alert: 2
   no-caller: 2

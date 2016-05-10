@@ -1,25 +1,24 @@
-import React, {PropTypes} from 'react';
-import {findDOMNode} from 'react-dom';
-import {reduxForm} from 'redux-form';
+import React, {PropTypes} from 'react'
+import {reduxForm} from 'redux-form'
 
 const fields = ["firstName", "lastName", "company", "isStoreAccount", "defaultPercSplit",
-  "address", "address2", "city", "state", "zip", "email"];
+  "address", "address2", "city", "state", "zip", "email"]
 
 // at some point we should have some general validators module that we can use to build
 // a validate function. probably pass in a big hash keyed to field with things like required,
 // data type (inter/float), max/min length, etc. should be pretty easy to unit test, too
 const validate = values => {
-  const errors = {};
+  const errors = {}
   if(!values.email){
-    errors.email = "Required";
+    errors.email = "Required"
   }
   if(!values.defaultPercSplit){
-    errors.defaultPercSplit = "Required";
+    errors.defaultPercSplit = "Required"
   }
   if(!(values.firstName && values.lastName) && !values.company){
-    errors['_error'] = "Need a name or company";
+    errors['_error'] = "Need a name or company"
   }
-  return errors;
+  return errors
 }
 
 const AddConsignorForm = React.createClass({
@@ -28,7 +27,7 @@ const AddConsignorForm = React.createClass({
       fields: { firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
         city, state, zip, email },
       // redux-form provided helpers
-      error, resetForm, handleSubmit, submitting, submitFailed
+      error, handleSubmit, submitting, submitFailed
     } = this.props
 
     return <form onSubmit={handleSubmit}>
@@ -63,9 +62,9 @@ const AddConsignorForm = React.createClass({
         <input type="submit" value="Add Consignor" disabled={submitting} />
         {submitting && <img src="/img/loading.gif" />}
       </p>
-    </form>;
+    </form>
   }
-});
+})
 
 AddConsignorForm.propTypes = {
   fields: PropTypes.object.isRequired,
@@ -79,4 +78,4 @@ export default reduxForm({
   form: 'addConsignor',
   fields,
   validate
-})(AddConsignorForm);
+})(AddConsignorForm)

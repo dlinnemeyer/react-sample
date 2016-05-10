@@ -3,19 +3,20 @@
  * We're doing on-submit instead of onchange here to reduce server calls? though onblur would
  * probably be better?
  */
-import React, {PropTypes} from 'react';
-import {reduxForm} from 'redux-form';
+import React, {PropTypes} from 'react'
+import {reduxForm} from 'redux-form'
 
 const fields = ["firstName", "lastName", "company", "isStoreAccount", "defaultPercSplit",
-  "address", "address2", "city", "state", "zip", "email"];
+  "address", "address2", "city", "state", "zip", "email"]
 
 const ConsignorListFilter = React.createClass({
   render(){
     const {
-      fields: { firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
-        city, state, zip, email },
-      // redux-form provided helpers
-      error, resetForm, handleSubmit, submitting, submitFailed
+      fields: {
+        firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
+        city, state, zip, email
+      },
+      handleSubmit, submitting
     } = this.props
 
     return <form onSubmit={handleSubmit}>
@@ -29,8 +30,8 @@ const ConsignorListFilter = React.createClass({
         <label>Store Account</label>
         <select name="isStoreAccount" {...isStoreAccount} value={isStoreAccount.value || ''}>
           <option></option>
-          <option value='1'>Yes</option>
-          <option value='0'>No</option>
+          <option value="1">Yes</option>
+          <option value="0">No</option>
         </select>
         <input type="text" placeholder="Split" {...defaultPercSplit} />
         <input type="text" placeholder="Address" {...address} />
@@ -43,9 +44,9 @@ const ConsignorListFilter = React.createClass({
         <input type="submit" value="Search" disabled={submitting} />
         {submitting && <img src="/img/loading.gif" />}
       </p>
-    </form>;
+    </form>
   }
-});
+})
 
 ConsignorListFilter.propTypes = {
   fields: PropTypes.object.isRequired,
@@ -58,4 +59,4 @@ ConsignorListFilter.propTypes = {
 export default reduxForm({
   form: 'filterConsignorList',
   fields
-})(ConsignorListFilter);
+})(ConsignorListFilter)

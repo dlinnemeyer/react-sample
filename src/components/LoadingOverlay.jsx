@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 export default React.createClass({
   render(){
@@ -6,6 +6,6 @@ export default React.createClass({
       <div style={{padding: "20px", opacity: "1", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}>
         <img src="/img/loading-big.svg" />
       </div>
-    </div>;
+    </div>
   }
-});
+})

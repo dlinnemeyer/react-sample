@@ -1,14 +1,13 @@
-import React, {PropTypes} from 'react';
-import {displayName as displayName,linkPath} from '../models/consignor';
-import Address from './Address';
-import {Link} from 'react-router';
+import React, {PropTypes} from 'react'
+import {displayName as displayName, linkPath} from '../models/consignor'
+import {Link} from 'react-router'
 
 const fields = ["displayName", "email", "itemCount", "isStoreAccount", "defaultPercSplit",
-  "address", "city", "state", "zip"];
+  "address", "city", "state", "zip"]
 
 const ConsignorList = React.createClass({
   render: function() {
-    const {consignors, sort} = this.props;
+    const {consignors, sort} = this.props
     return <table>
     <thead>
       <tr>
@@ -22,8 +21,8 @@ const ConsignorList = React.createClass({
     </thead>
     <tbody>
       {Object.keys(consignors).filter(c => consignors[c]).map(c => {
-        const consignor = consignors[c];
-        const del = () => this.props.deleteConsignor(consignor);
+        const consignor = consignors[c]
+        const del = () => this.props.deleteConsignor(consignor)
         return (
           <tr key={consignor.id}>
             <td><Link to={linkPath(consignor)}>{displayName(consignor)}</Link></td>
@@ -35,17 +34,17 @@ const ConsignorList = React.createClass({
             <td>{consignor.city}</td>
             <td>{consignor.state}</td>
             <td>{consignor.zip}</td>
-            <td><a href='#' onClick={del}>delete</a></td>
+            <td><a href="#" onClick={del}>delete</a></td>
           </tr>
         )
       })}
-    </tbody></table>;
+    </tbody></table>
   }
-});
+})
 
 ConsignorList.propTypes = {
   deleteConsignor: PropTypes.func.isRequired,
   sort: PropTypes.func.isRequired
 }
 
-export default ConsignorList;
+export default ConsignorList
