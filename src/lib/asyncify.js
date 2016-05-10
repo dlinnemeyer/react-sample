@@ -69,13 +69,13 @@ function loading(id, subId = "_", isLoading){
   }
 }
 
-function error(id, message){
-  return {
-    type: "COMPONENT_ERROR",
-    id,
-    message
-  }
-}
+// function error(id, message){
+//   return {
+//     type: "COMPONENT_ERROR",
+//     id,
+//     message
+//   }
+// }
 
 function data(id, subId = "_", data){
   return {

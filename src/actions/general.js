@@ -1,4 +1,4 @@
-function error(id, message){
+export function error(id, message){
   return {
     type: "ERROR",
     id,

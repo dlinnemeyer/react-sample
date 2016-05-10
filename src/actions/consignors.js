@@ -1,5 +1,5 @@
-import * as consignors from "../data/consignors"
-import {globalErrorize, asyncWrap} from "./misc"
+import {add, del, getAll, search, __getConsignors, __setConsignors} from "../data/consignors"
+import {globalErrorize} from "./misc"
 import faker from "faker"
 
 export function addConsignor(consignor){
@@ -8,7 +8,7 @@ export function addConsignor(consignor){
     // to do, and components actually calling this action can catch errors.
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
-    return consignors.add(consignor)
+    return add(consignor)
       .then(consignor => {
         dispatch(addConsignorAction(consignor))
         // in case anyone else is chaining on this? though they probably shouldn't, since
@@ -21,7 +21,7 @@ export function addConsignor(consignor){
 
 export function deleteConsignor(consignor){
   return (dispatch) => {
-    return consignors.del(consignor)
+    return del(consignor)
       .then(consignor => {
         dispatch(deleteConsignorAction(consignor))
         return consignor
@@ -32,7 +32,7 @@ export function deleteConsignor(consignor){
 
 export function loadConsignor(id){
   return (dispatch) => {
-    return consignors.getAll([id])
+    return getAll([id])
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors))
         return consignors[id]
@@ -42,7 +42,7 @@ export function loadConsignor(id){
 
 export function loadConsignors(ids){
   return (dispatch) => {
-    return consignors.getAll(ids)
+    return getAll(ids)
       .then(consignors => {
         dispatch(loadConsignorsAction(consignors))
         return consignors
@@ -52,7 +52,7 @@ export function loadConsignors(ids){
 
 export function searchConsignors(data, sortBy, {page, perPage}){
   return dispatch => {
-    return consignors.search(data, sortBy)
+    return search(data, sortBy)
       .then(consignors => {
         // TODO: not sure if this is worth abstracting? could at least make a generic
         // loadModels("consignor", consignors)?
@@ -80,8 +80,8 @@ export function addFakeConsignors(num = 50){
     newConsignors[consignor.id] = consignor
     i++
   }
-  consignors.__setConsignors(Object.assign({},
-    consignors.__getConsignors(),
+  __setConsignors(Object.assign({},
+    __getConsignors(),
     newConsignors
   ))
 
@@ -90,8 +90,8 @@ export function addFakeConsignors(num = 50){
 
 export function deleteAllConsignors(){
   return dispatch => {
-    const all = consignors.__getConsignors()
-    consignors.__setConsignors({})
+    const all = __getConsignors()
+    __setConsignors({})
     Object.keys(all).forEach(cid => dispatch(deleteConsignorAction(all[cid])))
   }
 }

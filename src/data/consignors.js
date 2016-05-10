@@ -15,7 +15,7 @@ export function __setConsignors(consignors){
 }
 
 export function getAll(ids){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const allConsignors = __getConsignors()
     const consignors = ids
       ? arrToHash(ids.map(id => allConsignors[id]).filter(c => !!(c)))
@@ -25,7 +25,7 @@ export function getAll(ids){
 }
 
 export function search(data, sortBy){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const allConsignors = __getConsignors()
 
     const consignors = {}
@@ -111,7 +111,7 @@ export function add(consignor){
 
 // another "ajax" call
 export function del(consignor){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const consignors = __getConsignors()
     delete consignors[consignor.id]
     __setConsignors(consignors)

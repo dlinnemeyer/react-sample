@@ -13,7 +13,7 @@ export function __setItems(items){
 }
 
 export function getAll(ids){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const allItems = __getItems()
     const items = isUndefined(ids)
       ? allItems
@@ -47,7 +47,7 @@ export function add(item){
 }
 
 export function del(item){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const items = __getItems()
     delete items[item.id]
     store.set("items", items)
@@ -56,7 +56,7 @@ export function del(item){
 }
 
 export function search(data, sortBy){
-  return promiseDelay((resolve, reject) => {
+  return promiseDelay((resolve) => {
     const allItems = __getItems()
 
     const items = {}

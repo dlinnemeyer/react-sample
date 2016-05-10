@@ -86,7 +86,6 @@ export function searchItems(data, sortBy, {page, perPage}){
 
 export function addFakeItems(num = 50){
   const newItems = {}
-  const consignorItems = {}
   const consignors =__getConsignors()
   let i = 0
   while(num > i){
@@ -117,7 +116,7 @@ export function deleteAllItems(){
 }
 
 
-function fakeItem(consignors){
+function fakeItem(){
   // trying to get a more realistic distribution here
   const priceMax = faker.random.number(10) > 8 ? 5000 : 100
   const random = (odds, value) => faker.random.number(10) < odds ? value : ""

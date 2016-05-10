@@ -8,8 +8,8 @@ export function randomNetworkError(){
 export function promiseDelay(func){
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      let err = {}
-      if(err = randomNetworkError()){
+      let err = randomNetworkError()
+      if(err){
         reject(err)
         return
       }
