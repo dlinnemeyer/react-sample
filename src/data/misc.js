@@ -1,6 +1,6 @@
 export function randomNetworkError(){
   // Just change the > 10 bit to change the frequency of errors
-  return Math.floor(Math.random() * 10) > 8 ? {code: 99, title: 'server_error'} : null;
+  return Math.floor(Math.random() * 10) > 8 ? {code: 99, title: 'server_error'} : null
 }
 
 // just wrap a function in a promise and a settimeout, passing in resolve/reject from the promise
@@ -8,17 +8,17 @@ export function randomNetworkError(){
 export function promiseDelay(func){
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      let err = {};
+      let err = {}
       if(err = randomNetworkError()){
-        reject(err);
-        return;
+        reject(err)
+        return
       }
 
-      func(resolve, reject);
-    }, randomTime());
-  });
+      func(resolve, reject)
+    }, randomTime())
+  })
 }
 
 export function randomTime(){
-  return Math.random() * 2000 + 500;
+  return Math.random() * 2000 + 500
 }

@@ -8,4 +8,4 @@ export function mergeQuery(query){
 
 }
 
-export const history = browserHistory;
+export const history = browserHistory

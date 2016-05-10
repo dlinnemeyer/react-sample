@@ -5,7 +5,7 @@ import {getAll as getItemsFromState} from '../models/item';
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
 import {loadConsignor} from '../actions/consignors'
-import {loadItems} from '../actions/items'
+import {searchItems} from '../actions/items'
 import InnerLoading from './InnerLoading'
 import Error from './Error'
 import {asyncify} from '../lib/asyncify'
@@ -18,12 +18,9 @@ export const Consignor = React.createClass({
   },
 
   componentWillMount(){
-    this.props.consignor.load(this.id())
-      .then(consignor => this.props.items.load(consignor.items));
-  },
-
-  itemsData(){
-    return map(this.props.items.data, i => i);
+    this.props.consignor.load(this.id());
+    // TODO: we should probably paginate this. we have a pagination component that'd be easy to inject
+    this.props.items.load({consignorid: this.id()}, "sku", {page: 1, perPage: 50});
   },
 
   render: function() {
@@ -35,7 +32,7 @@ export const Consignor = React.createClass({
         : <ConsignorDetails consignor={consignor.data} />}
       {items.loading || consignor.loading
         ? <InnerLoading />
-        : <ItemList items={this.itemsData()} />}
+        : <ItemList items={items.data.items} />}
     </div>;
   }
 });
@@ -48,6 +45,6 @@ Consignor.propTypes = {
 const ReduxedConsignor = connect()(Consignor);
 
 export const ConsignorContainer = asyncify(ReduxedConsignor, "consignor", {
-  "consignor": {data: {}, loading: true, load: loadConsignor },
-  "items": {data: {}, load: loadItems}
+  "consignor": {loading: true, load: loadConsignor },
+  "items": {load: searchItems}
 });

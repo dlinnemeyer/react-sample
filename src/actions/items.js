@@ -1,6 +1,7 @@
 import * as items from "../data/items"
 import {__getConsignors, __setConsignors} from "../data/consignors"
 import faker from "faker"
+import {filter, includes} from 'lodash'
 // I don't like the globalErrorize method, since the current methodology forces every async action
 // to remember to add it. I wonder if we could add a wrapper to ajax calls
 // that could handle calling the globalError action on specified error codes. for example:
@@ -30,12 +31,12 @@ export function addItem(item){
     // else handles the error?
     return items.add(item)
       .then(item => {
-        dispatch(addItemAction(item));
+        dispatch(addItemAction(item))
         // in case anyone else is chaining on this? though they probably shouldn't, since
         // everything else should flow through redux actions/reducers?
-        return item;
+        return item
       })
-      .catch(globalErrorize(dispatch));
+      .catch(globalErrorize(dispatch))
   }
 }
 
@@ -43,10 +44,10 @@ export function deleteItem(item){
   return (dispatch) => {
     return items.del(item)
       .then(item => {
-        dispatch(deleteItemAction(item));
-        return item;
+        dispatch(deleteItemAction(item))
+        return item
       })
-      .catch(globalErrorize(dispatch));
+      .catch(globalErrorize(dispatch))
   }
 }
 
@@ -54,57 +55,80 @@ export function loadItems(ids){
   return (dispatch) => {
     return items.getAll(ids)
       .then(items => {
-        dispatch(loadItemsAction(items));
-        return items;
-      });
+        dispatch(loadItemsAction(items))
+        return items
+      })
   }
 }
 
+export function searchItems(data, sortBy, {page, perPage}){
+  if(!page) page = 1
+  if(!perPage) perPage = 20
+  return dispatch => {
+    return items.search(data, sortBy)
+      .then(items => {
+        // TODO: not sure if this is worth abstracting? could at least make a generic
+        // loadModels()?
+        dispatch(loadItemsAction(items))
+
+        const start = (page - 1) * perPage
+        const end = start + perPage
+        const ids = Object.keys(items).slice(start,end)
+        return {
+          items: filter(items, i => includes(ids, i.id)),
+          pages: Math.ceil(ids.length / perPage),
+          count: ids.length
+        }
+      })
+  }
+}
+
+
 export function addFakeItems(num = 50){
-  const newItems = {};
-  const consignorItems = {};
-  const consignors =__getConsignors();
-  let i = 0;
+  const newItems = {}
+  const consignorItems = {}
+  const consignors =__getConsignors()
+  let i = 0
   while(num > i){
-    let item = fakeItem();
-    newItems[item.id] = item;
+    let item = fakeItem()
+    newItems[item.id] = item
 
-    let consignor = faker.random.objectElement(consignors);
-    item.consignorid = consignor.id;
-    consignor.items.push(item.id);
+    let consignor = faker.random.objectElement(consignors)
+    item.consignorid = consignor.id
+    consignor.items.push(item.id)
 
-    i++;
+    i++
   }
   items.__setItems(Object.assign({},
     items.__getItems(),
     newItems
-  ));
-  __setConsignors(consignors);
+  ))
+  __setConsignors(consignors)
 
-  return loadItemsAction(newItems);
+  return loadItemsAction(newItems)
 }
 
 export function deleteAllItems(){
   return dispatch => {
-    const all = items.__getItems();
-    items.__setItems({});
-    Object.keys(all).forEach(iid => dispatch(deleteItemAction(all[iid])));
+    const all = items.__getItems()
+    items.__setItems({})
+    Object.keys(all).forEach(iid => dispatch(deleteItemAction(all[iid])))
   }
 }
 
 
 function fakeItem(consignors){
   // trying to get a more realistic distribution here
-  const priceMax = faker.random.number(10) > 8 ? 5000 : 100;
+  const priceMax = faker.random.number(10) > 8 ? 5000 : 100
   const random = (odds, value) => faker.random.number(10) < odds ? value : ""
   const times = (n, func) => {
-    let i = 0;
-    let results = "";
+    let i = 0
+    let results = ""
     while(n > i){
-      results += func();
-      i++;
+      results += func()
+      i++
     }
-    return results;
+    return results
   }
   return {
     id: faker.random.uuid(),

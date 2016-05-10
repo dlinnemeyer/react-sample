@@ -10,12 +10,12 @@ export function addConsignor(consignor){
     // else handles the error?
     return consignors.add(consignor)
       .then(consignor => {
-        dispatch(addConsignorAction(consignor));
+        dispatch(addConsignorAction(consignor))
         // in case anyone else is chaining on this? though they probably shouldn't, since
         // everything else should flow through redux actions/reducers?
-        return consignor;
+        return consignor
       })
-      .catch(globalErrorize(dispatch));
+      .catch(globalErrorize(dispatch))
   }
 }
 
@@ -23,10 +23,10 @@ export function deleteConsignor(consignor){
   return (dispatch) => {
     return consignors.del(consignor)
       .then(consignor => {
-        dispatch(deleteConsignorAction(consignor));
-        return consignor;
+        dispatch(deleteConsignorAction(consignor))
+        return consignor
       })
-      .catch(globalErrorize(dispatch));
+      .catch(globalErrorize(dispatch))
   }
 }
 
@@ -34,9 +34,9 @@ export function loadConsignor(id){
   return (dispatch) => {
     return consignors.getAll([id])
       .then(consignors => {
-        dispatch(loadConsignorsAction(consignors));
-        return consignors[id];
-      });
+        dispatch(loadConsignorsAction(consignors))
+        return consignors[id]
+      })
   }
 }
 
@@ -44,9 +44,9 @@ export function loadConsignors(ids){
   return (dispatch) => {
     return consignors.getAll(ids)
       .then(consignors => {
-        dispatch(loadConsignorsAction(consignors));
-        return consignors;
-      });
+        dispatch(loadConsignorsAction(consignors))
+        return consignors
+      })
   }
 }
 
@@ -56,43 +56,43 @@ export function searchConsignors(data, sortBy, {page, perPage}){
       .then(consignors => {
         // TODO: not sure if this is worth abstracting? could at least make a generic
         // loadModels("consignor", consignors)?
-        dispatch(loadConsignorsAction(consignors));
+        dispatch(loadConsignorsAction(consignors))
 
-        const ids = Object.keys(consignors);
-        const start = (page - 1) * perPage;
-        const end = start + perPage;
+        const ids = Object.keys(consignors)
+        const start = (page - 1) * perPage
+        const end = start + perPage
         // TODO: change this? updating derived/async page data
         return {
           ids: ids.slice(start, end),
           // consignors: ..., should include consignors. just makes things easier on the component end
           pages: Math.ceil(ids.length / perPage),
           count: ids.length
-        };
-      });
+        }
+      })
   }
 }
 
 export function addFakeConsignors(num = 50){
-  const newConsignors = {};
-  let i = 0;
+  const newConsignors = {}
+  let i = 0
   while(num > i){
-    let consignor = fakeConsignor();
-    newConsignors[consignor.id] = consignor;
-    i++;
+    let consignor = fakeConsignor()
+    newConsignors[consignor.id] = consignor
+    i++
   }
   consignors.__setConsignors(Object.assign({},
     consignors.__getConsignors(),
     newConsignors
-  ));
+  ))
 
-  return loadConsignorsAction(newConsignors);
+  return loadConsignorsAction(newConsignors)
 }
 
 export function deleteAllConsignors(){
   return dispatch => {
-    const all = consignors.__getConsignors();
-    consignors.__setConsignors({});
-    Object.keys(all).forEach(cid => dispatch(deleteConsignorAction(all[cid])));
+    const all = consignors.__getConsignors()
+    consignors.__setConsignors({})
+    Object.keys(all).forEach(cid => dispatch(deleteConsignorAction(all[cid])))
   }
 }
 

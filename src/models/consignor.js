@@ -1,11 +1,11 @@
 export function displayName(consignor){
   return consignor.company
     ? consignor.company
-    : consignor.firstName + " " + consignor.lastName;
+    : consignor.firstName + " " + consignor.lastName
 }
 
 export function linkPath(consignor){
-  return "/consignors/" + encodeURIComponent(consignor.id);
+  return "/consignors/" + encodeURIComponent(consignor.id)
 }
 
 
@@ -14,5 +14,5 @@ export function linkPath(consignor){
 // functions would be nice? In that case, reducers/actions are what we use to manipulate state,
 // and state helpers would be for data retrieval (getters)?
 export function get(state, id){
-  return state.consignors[id];
+  return state.consignors[id]
 }
