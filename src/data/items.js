@@ -80,6 +80,8 @@ function sortCompare(a, b, sortBy){
 
 function getSortValue(item, sortBy){
   switch(sortBy){
+    case "printed":
+      return item.printed ? 1 : 0
     default:
       return item[sortBy] || ""
   }

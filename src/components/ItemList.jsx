@@ -1,8 +1,10 @@
 import React, {PropTypes} from 'react'
 import {linkPath} from '../models/item'
 import {Link} from 'react-router'
+import {toString} from 'lodash'
 
-const fields = ["sku", "title", "brand", "color", "size", "description", "percSplit", "price"]
+const fields = ["sku", "title", "brand", "color", "size", "description", "percSplit",
+  "price", "printed"]
 
 const ItemList = React.createClass({
   render: function() {
@@ -25,8 +27,8 @@ const ItemList = React.createClass({
           <tr key={item.id}>
             {fields.map(f => {
               return f == "sku"
-                ? <td key="sku"><Link to={linkPath(item)}>{item[f]}</Link></td>
-                : <td key={f}>{item[f]}</td>
+                ? <td key="sku"><Link to={linkPath(item)}>{item['sku']}</Link></td>
+                : <td key={f}>{toString(item[f])}</td>
             })}
           </tr>
         )

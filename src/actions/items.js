@@ -1,7 +1,7 @@
 import {add, del, getAll, search, __getItems, __setItems} from "../data/items"
 import {__getConsignors, __setConsignors} from "../data/consignors"
 import faker from "faker"
-import {keyBy, filter, includes} from 'lodash'
+import {size, keyBy, filter, includes} from 'lodash'
 // I don't like the globalErrorize method, since the current methodology forces every async action
 // to remember to add it. I wonder if we could add a wrapper to ajax calls
 // that could handle calling the globalError action on specified error codes. for example:
@@ -81,14 +81,15 @@ export function searchItems(data, sortBy, {page, perPage}){
         // loadModels()?
         dispatch(loadItemsAction(allItems))
 
+        const total = size(allItems)
         const start = (page - 1) * perPage
         const end = start + perPage
         const ids = Object.keys(allItems).slice(start, end)
         const slicedItems = keyBy(filter(allItems, i => includes(ids, i.id)), "id")
         return {
           items: slicedItems,
-          pages: Math.ceil(ids.length / perPage),
-          count: ids.length
+          pages: Math.ceil(total / perPage),
+          count: total
         }
       })
   }
@@ -149,7 +150,8 @@ function fakeItem(){
     size: random(8, times(2, faker.random.alphaNumeric)),
     description: random(8, faker.commerce.productName()),
     percSplit: faker.random.number(100),
-    price: faker.commerce.price(0, priceMax)
+    price: faker.commerce.price(0, priceMax),
+    printed: faker.random.boolean()
   }
 }
 

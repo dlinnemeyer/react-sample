@@ -53,7 +53,6 @@ export function asyncWrap(func, componentId, channelId){
       return getMeMyPromise(dispatch)
         .then((response) => {
           dispatch(setData(componentId, channelId, response))
-          dispatch(loading(componentId, channelId, false))
           return response
         })
     }
@@ -106,7 +105,8 @@ function reducerSet(state, id, subId, key, data){
 export function reducer(state = {}, action) {
   switch (action.type) {
   case 'COMPONENT_DATA':
-    return reducerSet(state, action.id, action.subId, 'data', action.data)
+    return reducerSet(reducerSet(state, action.id, action.subId, 'data', action.data),
+      action.id, action.subId, 'loading', false)
   case 'COMPONENT_LOADING':
     return reducerSet(state, action.id, action.subId, 'loading', action.isLoading)
   case 'COMPONENT_ERROR':
