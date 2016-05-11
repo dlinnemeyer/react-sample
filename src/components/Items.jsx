@@ -14,9 +14,13 @@ const itemFields = ["id", "sku", "title", "brand", "color", "size", "description
 
 export const Items = React.createClass({
 
-  loadItems(data){
+  setSettings(data){
     const mergedData = Object.assign({}, this.props.userSettings, data)
     this.props.router.push({pathname: '/items', query: mergedData})
+  },
+
+  loadItems(data){
+    const mergedData = Object.assign({}, this.props.userSettings, data)
 
     const { sortBy, page } = mergedData
     const filters = this.filterThemSettingsToTheFilters(mergedData)
@@ -28,21 +32,27 @@ export const Items = React.createClass({
     this.loadItems()
   },
 
-  componentWillReceiveProps(next){
-    console.log(next.userSettings, this.props.userSettings);
-    if(!isEqual(next.userSettings, this.props.userSettings)) this.loadItems();
+  // using componentDidUpdate instead of componentWillUpdate or componentWillReceiveProps to avoid
+  // render problems. We had a bug where react couldn't find a DOM element it needed due to an action
+  // being fired in componentWillReceiveProps.
+  // There was a UX change that triggered prop changes, which triggered a data re-load. For some
+  // reason, though, the render from the FIRST change didn't finish before the second render started.
+  // The second render was hiding certain elements (based on loading prop) that React expected
+  // to be there, and it threw a react error. still rendered fine, but it made my suspicious.
+  componentDidUpdate(prev){
+    if(!isEqual(prev.userSettings, this.props.userSettings)) this.loadItems()
   },
 
   onFilterSubmit(data){
-    this.loadItems(data)
+    this.setSettings(data)
   },
 
   paginate(pageNumber){
-    this.loadItems({page: pageNumber})
+    this.setSettings({page: pageNumber})
   },
 
   sort(field){
-    this.loadItems({sortBy: field})
+    this.setSettings({sortBy: field})
   },
 
   filterThemSettingsToTheFilters(settings){

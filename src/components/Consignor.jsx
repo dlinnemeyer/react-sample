@@ -6,6 +6,7 @@ import {loadConsignor} from '../actions/consignors'
 import {searchItems} from '../actions/items'
 import InnerLoading from './InnerLoading'
 import {asyncify} from '../lib/asyncify'
+import Error from './Error'
 
 export const Consignor = React.createClass({
 
@@ -21,6 +22,8 @@ export const Consignor = React.createClass({
 
   render: function() {
     const { consignor, items } = this.props
+
+    if(consignor.error) return <Error message={consignor.error.title} />
 
     return <div>
       {consignor.loading

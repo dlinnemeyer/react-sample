@@ -5,7 +5,7 @@ export function displayName(consignor){
 }
 
 export function linkPath(consignor){
-  return `/consignors/${encodeURIComponent(consignor.id)}`
+  return `/consignors/${encodeURIComponent(consignor.id)}`;
 }
 
 

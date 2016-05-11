@@ -3,7 +3,7 @@ import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import GlobalError from './GlobalError'
 
-export const App = React.createClass({
+const App = React.createClass({
   render: function() {
     return <div id="wrapper">
       <nav>

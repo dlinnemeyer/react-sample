@@ -14,6 +14,13 @@ export function __setConsignors(consignors){
   return store.set("consignors", consignors)
 }
 
+export function get(id){
+  return promiseDelay((resolve, reject) => {
+    const consignor = __getConsignors()[id]
+    consignor ? resolve(consignor) : reject({code: 76, title: "invalid consignorid"})
+  })
+}
+
 export function getAll(ids){
   return promiseDelay((resolve) => {
     const allConsignors = __getConsignors()

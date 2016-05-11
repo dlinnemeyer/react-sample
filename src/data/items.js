@@ -12,6 +12,13 @@ export function __setItems(items){
   return store.set("items", items)
 }
 
+export function get(id){
+  return promiseDelay((resolve, reject) => {
+    const item = __getItems()[id]
+    item ? resolve(item) : reject({code: 76, title: "invalid itemid"})
+  })
+}
+
 export function getAll(ids){
   return promiseDelay((resolve) => {
     const allItems = __getItems()

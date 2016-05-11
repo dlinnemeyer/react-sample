@@ -1,4 +1,4 @@
-import {add, del, getAll, search, __getConsignors, __setConsignors} from "../data/consignors"
+import {add, del, get, getAll, search, __getConsignors, __setConsignors} from "../data/consignors"
 import {globalErrorize} from "./misc"
 import faker from "faker"
 
@@ -32,10 +32,10 @@ export function deleteConsignor(data){
 
 export function loadConsignor(id){
   return (dispatch) => {
-    return getAll([id])
-      .then(consignors => {
-        dispatch(loadConsignorsAction(consignors))
-        return consignors[id]
+    return get(id)
+      .then(consignor => {
+        dispatch(loadConsignorsAction({id: consignor}))
+        return consignor
       })
   }
 }

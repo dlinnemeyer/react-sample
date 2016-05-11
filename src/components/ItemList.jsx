@@ -17,7 +17,6 @@ const ItemList = React.createClass({
           <span style={{cursor: "pointer"}} onClick={() => sort(field)}>{field}</span>
         </th>
         )})}
-        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -33,7 +32,8 @@ const ItemList = React.createClass({
           </tr>
         )
       })}
-    </tbody></table>
+    </tbody>
+    </table>
   }
 })
 

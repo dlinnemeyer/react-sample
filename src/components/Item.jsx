@@ -6,6 +6,7 @@ import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router'
 import InnerLoading from './InnerLoading'
 import {asyncify} from '../lib/asyncify'
+import Error from './Error'
 
 export const Item = React.createClass({
   id(){
@@ -22,6 +23,8 @@ export const Item = React.createClass({
 
   render: function() {
     const { del, item, consignor } = this.props
+
+    if(item.error) return <Error message={item.error.title} />
 
     return <div>
       {item.loading || consignor.loading

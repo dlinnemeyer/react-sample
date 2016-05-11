@@ -1,4 +1,4 @@
-import {add, del, getAll, search, __getItems, __setItems} from "../data/items"
+import {add, del, get, getAll, search, __getItems, __setItems} from "../data/items"
 import {__getConsignors, __setConsignors} from "../data/consignors"
 import faker from "faker"
 import {size, keyBy, filter, includes} from 'lodash'
@@ -63,10 +63,10 @@ export function loadItems(ids){
 
 export function loadItem(id){
   return (dispatch) => {
-    return getAll([id])
-      .then(items => {
-        dispatch(loadItemsAction(items))
-        return items[id]
+    return get(id)
+      .then(item => {
+        dispatch(loadItemsAction({id: item}))
+        return item
       })
   }
 }
