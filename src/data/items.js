@@ -2,7 +2,7 @@ import {promiseDelay} from './misc'
 import store from 'store'
 import {arrToHash} from '../misc'
 import {__getConsignors, __setConsignors} from './consignors'
-import {isUndefined, isNumber, isBoolean, toString} from 'lodash'
+import _, {size, isUndefined, isNumber, isBoolean, toString} from 'lodash'
 
 export function __getItems(){
   return store.get("items") || {}
@@ -62,20 +62,32 @@ export function del(item){
   })
 }
 
-export function search(data, sortBy){
-  return promiseDelay((resolve) => {
+export function search(data = {}, sortBy = "displayName", {page = 1, perPage = 20}){
+  return promiseDelay((resolve, reject) => {
+    if(data.printed){
+      reject({code: 172, title: "nO! no printed filter for you!"})
+      return
+    }
     const allItems = __getItems()
 
-    const items = {}
-    Object.keys(allItems).filter(id => {
+    // first, search filter and sort
+    const filteredIds = Object.keys(allItems).filter(id => {
       return searchCompare(data, allItems[id])
     }).sort((a, b) => {
       return sortCompare(allItems[a], allItems[b], sortBy)
-    }).forEach(id => {
-      items[id] = allItems[id]
     })
 
-    resolve(items)
+    // now limit/offset
+    const total = size(filteredIds)
+    const start = (page - 1) * perPage
+    const end = start + perPage
+    const items = _(filteredIds).slice(start, end).map(id => allItems[id]).keyBy("id").value()
+
+    resolve({
+      items,
+      pages: Math.ceil(total / perPage),
+      count: total
+    })
   })
 }
 

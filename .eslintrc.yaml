@@ -27,6 +27,7 @@ rules:
   # syntax/language rules to lil' bugs
   no-self-compare: 1
   no-unused-expressions: [1, {allowShortCircuit: true, allowTernary: true}]
+  no-unused-vars: 1
   no-var: 1
   prefer-arrow-callback: 1
   prefer-const: 1

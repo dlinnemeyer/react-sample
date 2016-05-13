@@ -1,84 +1,58 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
-import _, {keys, each, assign} from 'lodash'
+import _, {mapValues, keys, each, assign, isEqual} from 'lodash'
 
 // higher-order component to provide basic connection to redux-stored component goodies for channels,
 // like errors, loading state, resulting data, etc.
 export function asyncify(Component, componentId, channels = {}){
-  // build-in system-wide channel defaults from the beginning
-  map(channels, channel => assign({}, defaultChannel, channel))
+  // build-in system-wide channel defaults from the beginning, and wrap the load function
+  // to thunkify it
+  // TODO: make this a separate, testable lil' function
+  channels = mapValues(channels, (channel, chid) => {
+    return assign({}, defaultChannel, channel, {
+      id: chid, // add a convenient id reference
+      load: thunkifyAndWrap(channel.load, componentId, chid)
+    })
+  })
+  // convenience, so we don't have to keep calling keys
+  const channelIds = keys(channels)
 
   const wrapper = React.createClass({
 
-    // returns all the channel objects from props, which will be updated with current settings and such
+    // gets current channels from props, all updated and such
     channels(){
-      keys(channels).map(chid => this.props[chid])
+      return channelIds.map(chid => this.props[chid])
     },
-
-    // HACK: doing this because our version of load() isn't wrapped with dispatch. since we do that
-    // in render and pass it to the child component, we don't have access in other react lifecycle
-    // methods. there must be a better way of doing this.
-    loadChannel(ch){
-      return this.props.dispatch(ch.load(ch.settings))
-    },
-
 
     componentWillMount(){
       _(this.channels()).filter(ch => ch.onLoad).each(ch => {
-        this.loadChannel(ch)
+        ch.load(ch.settings)
       })
     },
 
     channelShouldLoad(ch, before){
-      return ch.onChange && !isEqual(ch.propsToSettings(before), ch.settings);
+      return ch.onChange && !isEqual(before[ch.id].settings, ch.settings)
     },
 
     componentDidUpdate(prev){
-      _(this.channels).filter(ch => channelShouldLoad(ch, prev, this.props)).each(ch => {
-        this.loadChannel(ch)
+      _(this.channels()).filter(ch => this.channelShouldLoad(ch, prev)).each(ch => {
+        ch.load(ch.settings)
       })
-    },
-
-    setSettings(channelId, settings){
-      return this.props.dispatch(settings(componentId, channelId, settings))
     },
 
     render(){
-      const props = assign({}, this.props)
-
-      // we're doing the dispatch wrapping here because we don't have access to dispatch
-      // in mapStateToProps. Is there a way to accomplish this in mapStateToProps so
-      // the lifecycle functions above have access to the wrapped versions?
-      each(keys(channels), ch => {
-          props[ch].load = (...args) => props.dispatch(props[ch].load(...args))
-          props[ch].setSettings = (settings) => this.setSettings(ch, settings)
-        }
-      })
-
-      return <Component {...props} />
+      return <Component {...this.props} />
     }
   })
 
-  function mapStateToProps(state, props){
+  function mapStateToProps(state){
     const component = Object.assign({}, state.components[componentId])
     const props = {componentId}
 
     // over-ride defaults with what's in the state
-    Object.keys(channels).forEach(ch => {
-      const userChannel = channels[ch]
-      // need to slip the prop/url-based settings in before what we find in the state, but after
-      // user defaults. this is for initial load, when the url may contain settings.
-      // after the page loads, settings are propagated to the query afterwards, so it shouldn't matter
-      // for those cases. TODO: better way to do this?
-      // assigning on this level so user provided defaults don't get stomped
-      const propSettings = assign(userChannel.settings, userChannel.mapPropsToSettings(props))
-      const stateChannel = component[ch]
-      props[ch] = Object.assign({}, userChannel, {settings: propSettings}, stateChannel)
-
-      // load settings in from
-      if(props[ch].load){
-        props[ch].load = asyncWrap(props[ch].load, componentId, ch)
-      }
+    each(channels, channel => {
+      const stateChannel = component[channel.id]
+      props[channel.id] = Object.assign({}, channel, stateChannel)
     })
 
     // TODO: add some global things, like isAnyLoading, isAnyErrors, etc.?
@@ -86,29 +60,51 @@ export function asyncify(Component, componentId, channels = {}){
     return props
   }
 
-  return connect(mapStateToProps)(wrapper)
+  function mapDispatchToProps(dispatch){
+    const props = {}
+    // make sure to just make objects with the functions as keys, and not to modify the original
+    // object by reference.
+    // mapStateToProps handles the other keys, so no need for those.
+    // And modifying the object by reference on the original channel object would mean
+    // we'd keep wrapping over and over again
+    // TODO: look into the version of mapDispatchToProps that returns a function. the docs claim
+    // we can memoize, which would be nice, so we don't have to keep function wrapping?
+    each(channels, channel => {
+      props[channel.id] = {
+        load: (...args) => dispatch(channel.load(...args)),
+        setSettings: (settings) => dispatch(setSettings(componentId, channel.id, settings))
+      }
+    })
+    return props
+  }
+
+  function mergeProps(state, dispatch, own){
+    // we need to pull core info (loading, errors, etc.) from state
+    // and we need to give dispatch props preference over those for functions, so we get the
+    // dispatch-wrapped functions
+    const mergedChannels = {}
+    each(channelIds, channelId => {
+      // give dispatch the preference within the channel, so we over-ride the original load
+      // also, we're assigning to mergedChannels because I ran into a bug that caused changes here
+      // to the dispatch object to stick around? there be strange beasties afoot
+      mergedChannels[channelId] = assign({}, state[channelId], dispatch[channelId])
+    })
+
+    // now return the normal merge operations, just with mergedChannels tacked on to take care
+    // of the channel props
+    return assign({}, own, state, dispatch, mergedChannels)
+  }
+
+  return connect(mapStateToProps, mapDispatchToProps, mergeProps)(wrapper)
 }
 
-// TODO:
 const defaultChannel = {
   settings: {},
   loading: false,
   data: {},
   //error, leaving error undefined so we can do nice if(!ch.error) stuffs
   onLoad: false,
-  onChange: false,
-  mapPropsToSettings: defaultMapPropsToSettings,
-  settingsToQs: []
-}
-
-// this is just here to get initial settings from query string, if settings are mapped to QS
-function defaultMapPropsToSettings(props, ch){
-  const settings = {}
-  const query = props.location.query
-  _(ch.settingsToQs).filter(setting => setting in query).each(setting => {
-    settings[setting] = query[setting]
-  })
-  return settings
+  onChange: false
 }
 
 
@@ -116,7 +112,7 @@ function defaultMapPropsToSettings(props, ch){
 // logic, but provides the same interface (just passes args onto the child function).
 // whatever data is returned by the promise is set to data when the promise resolves, and the same
 // goes for errors
-export function asyncWrap(func, componentId, channelId){
+export function thunkifyAndWrap(func, componentId, channelId){
   return (...args) => {
     // quick function wrappers to make the flow in the code below more obvious
     const _loading = (x) => loading(componentId, channelId, x)
@@ -140,7 +136,7 @@ export function asyncWrap(func, componentId, channelId){
   }
 }
 
-function settings(id, subId, data){
+function setSettings(id, subId, data){
   return {
     type: 'COMPONENT_SETTINGS',
     id,
@@ -202,7 +198,7 @@ export function reducer(state = {}, action) {
   case 'COMPONENT_ERROR':
     return reducerSet(state, action.id, action.subId, 'error', action.data)
   case 'COMPONENT_SETTINGS':
-    return reducerSet(state, action.id, action.subId, 'settings', action.settings)
+    return reducerSet(state, action.id, action.subId, 'settings', action.data)
   }
   return state
 }

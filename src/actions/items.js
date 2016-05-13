@@ -71,30 +71,9 @@ export function loadItem(id){
   }
 }
 
-export function searchItems(data, sortBy, {page, perPage}){
-  if(!page) page = 1
-  if(!perPage) perPage = 20
-  return dispatch => {
-    return search(data, sortBy)
-      .then(allItems => {
-        // TODO: not sure if this is worth abstracting? could at least make a generic
-        // loadModels()?
-        dispatch(loadItemsAction(allItems))
-
-        const total = size(allItems)
-        const start = (page - 1) * perPage
-        const end = start + perPage
-        const ids = Object.keys(allItems).slice(start, end)
-        const slicedItems = keyBy(filter(allItems, i => includes(ids, i.id)), "id")
-        return {
-          items: slicedItems,
-          pages: Math.ceil(total / perPage),
-          count: total
-        }
-      })
-  }
+export function searchItems(){
+  return 'test'
 }
-
 
 export function addFakeItems(num = 50){
   const newItems = {}
