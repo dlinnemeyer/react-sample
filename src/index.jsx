@@ -7,11 +7,12 @@ import reducers from './reducers/index'
 import {initialState} from './initialState.js'
 import routes from './routes'
 import thunk from 'redux-thunk'
-import {syncHistoryWithStore, routerReducer} from 'react-router-redux'
+import {syncHistoryWithStore, routerReducer, routerMiddleware, push} from 'react-router-redux'
 import {reducer as formReducer} from 'redux-form'
 import createLogger from 'redux-logger'
+import {queryStringMiddleware} from './lib/asyncify'
 
-let middleware = [thunk]
+let middleware = [thunk, routerMiddleware(browserHistory), queryStringMiddleware(push)]
 if(process.env.NODE_ENV !== 'production'){
   middleware.push(require('redux-immutable-state-invariant')())
   middleware.push(createLogger({collapsed: true}))

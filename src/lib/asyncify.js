@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
-import _, {mapValues, keys, each, assign, isEqual} from 'lodash'
+import _, {pick, pickBy, includes, size, mapValues, keys, each, assign, isEqual, omitBy, isFunction} from 'lodash'
 
 // higher-order component to provide basic connection to redux-stored component goodies for channels,
 // like errors, loading state, resulting data, etc.
@@ -8,26 +8,37 @@ export function asyncify(Component, componentId, channels = {}){
   // build-in system-wide channel defaults from the beginning, and wrap the load function
   // to thunkify it
   // TODO: make this a separate, testable lil' function
-  channels = mapValues(channels, (channel, chid) => {
-    return assign({}, defaultChannel, channel, {
-      id: chid, // add a convenient id reference
-      load: thunkifyAndWrap(channel.load, componentId, chid)
-    })
+  const initialChannels = mapValues(channels, (channel, id) => {
+    // add id references before passing to thunkifyAndWrap, which assumes a fully formed channel
+    const newChannel = assign({}, defaultChannel, channel, {id, componentId})
+    newChannel.load = thunkifyAndWrap(channel.load, newChannel)
+    return newChannel
   })
   // convenience, so we don't have to keep calling keys
-  const channelIds = keys(channels)
+  const channelIds = keys(initialChannels)
 
   const wrapper = React.createClass({
 
-    // gets current channels from props, all updated and such
+    propTypes: {
+      dispatch: PropTypes.func.isRequired
+    },
+
+    // gets current channels from props, all updated and such. props channels contain
+    // current settings, data, and such. the channels outside the component scope
+    // are just the user-passed channel configuration
     channels(){
       return channelIds.map(chid => this.props[chid])
     },
 
     componentWillMount(){
+      this.props.dispatch(mountComponent(this.channels()))
       _(this.channels()).filter(ch => ch.onLoad).each(ch => {
         ch.load(ch.settings)
       })
+    },
+
+    componentWillUnmount(){
+      this.props.dispatch(unmountComponent(componentId))
     },
 
     channelShouldLoad(ch, before){
@@ -50,7 +61,7 @@ export function asyncify(Component, componentId, channels = {}){
     const props = {componentId}
 
     // over-ride defaults with what's in the state
-    each(channels, channel => {
+    each(initialChannels, channel => {
       const stateChannel = component[channel.id]
       props[channel.id] = Object.assign({}, channel, stateChannel)
     })
@@ -61,7 +72,7 @@ export function asyncify(Component, componentId, channels = {}){
   }
 
   function mapDispatchToProps(dispatch){
-    const props = {}
+    const props = {dispatch}
     // make sure to just make objects with the functions as keys, and not to modify the original
     // object by reference.
     // mapStateToProps handles the other keys, so no need for those.
@@ -69,10 +80,10 @@ export function asyncify(Component, componentId, channels = {}){
     // we'd keep wrapping over and over again
     // TODO: look into the version of mapDispatchToProps that returns a function. the docs claim
     // we can memoize, which would be nice, so we don't have to keep function wrapping?
-    each(channels, channel => {
+    each(initialChannels, channel => {
       props[channel.id] = {
         load: (...args) => dispatch(channel.load(...args)),
-        setSettings: (settings) => dispatch(setSettings(componentId, channel.id, settings))
+        setSettings: (settings) => dispatch(setSettings(channel, settings))
       }
     })
     return props
@@ -99,12 +110,12 @@ export function asyncify(Component, componentId, channels = {}){
 }
 
 const defaultChannel = {
-  settings: {},
   loading: false,
-  data: {},
   //error, leaving error undefined so we can do nice if(!ch.error) stuffs
+  //same with data and settings
   onLoad: false,
   onChange: false
+  // settingsToQueryString undefined
 }
 
 
@@ -112,93 +123,182 @@ const defaultChannel = {
 // logic, but provides the same interface (just passes args onto the child function).
 // whatever data is returned by the promise is set to data when the promise resolves, and the same
 // goes for errors
-export function thunkifyAndWrap(func, componentId, channelId){
+export function thunkifyAndWrap(func, channel){
   return (...args) => {
-    // quick function wrappers to make the flow in the code below more obvious
-    const _loading = (x) => loading(componentId, channelId, x)
-    const _setData = (x) => setData(componentId, channelId, x)
-    const _error= (x) => error(componentId, channelId, x)
-
     return dispatch => {
-      dispatch(_loading(true))
+      dispatch(loadStart(channel))
       return func(...args)
         .then(response => {
-          dispatch(_setData(response))
-          dispatch(_loading(false))
+          dispatch(loadSuccess(channel, response))
           return response
         })
-        .catch(err => {
-          dispatch(_error(err))
-          dispatch(_loading(false))
-          return err
+        .catch(error => {
+          dispatch(loadError(channel, error))
+          return error
         })
     }
   }
 }
 
-function setSettings(id, subId, data){
-  return {
-    type: 'COMPONENT_SETTINGS',
-    id,
-    subId,
-    data
-  }
+function mountComponent(channels){
+  return { type: 'COMPONENT_MOUNT', channels }
 }
 
-function loading(id, subId, isLoading){
-  return {
-    type: 'COMPONENT_LOADING',
-    isLoading,
-    id,
-    subId
-  }
+function unmountComponent(componentId){
+  return { type: 'COMPONENT_UNMOUNT', componentId }
 }
 
-function error(id, subId, data){
-  return {
-    type: "COMPONENT_ERROR",
-    id,
-    subId,
-    data
-  }
+function setSettings(channel, settings){
+  return { type: 'COMPONENT_SETTINGS', channel, settings }
 }
 
-function setData(id, subId, data){
-  return {
-    type: "COMPONENT_DATA",
-    id,
-    subId,
-    data
-  }
+function loadStart(channel){
+  return { type: 'COMPONENT_LOAD_START', channel }
 }
 
-function reducerSet(state, id, subId, key, data){
-  const component = state[id] || {}
-  // this just overrides the data set on key. we don't merge for that, though we obviously merge
-  // for sub-components and components so we don't run over that data
-  const subComponent = Object.assign({}, component[subId] || {}, {
-    [key]: data
-  })
-  // immutable is silly when you get three keys deep, ain't it?
-  const mergedComponent = Object.assign({}, component, {
-    [subId] : subComponent
+function loadError(channel, error){
+  return { type: "COMPONENT_LOAD_ERROR", channel, error }
+}
+
+function loadSuccess(channel, data){
+  return { type: "COMPONENT_LOAD_SUCCESS", channel, data }
+}
+
+// merge is an object of values merged into the channel. this reducer should be applied
+// to the 'components' key in the state. The whole structure is:
+// {
+//  'components' : {
+//    [componentId] : {
+//      [channelId] : {
+//        loading: true|false,
+//        error: ...,
+//        data: ...,
+//        settings: ...
+//      }
+//    }
+//  }
+// }
+function reducerSet(state, channel, merge){
+  const { componentId, id: channelId } = channel
+
+  // merge the values from the action into the channel, all immutable like
+  const component = state[componentId] || {}
+  const mergedComponent = assign({}, component, {
+    [channelId] : assign({}, component[channelId] || {}, merge)
   })
 
   return Object.assign({}, state, {
-    [id]: mergedComponent
+    [componentId]: mergedComponent
   })
+}
+
+function destroyComponent(state, componentId){
+  const newState = assign({}, state)
+  delete newState[componentId]
+  return newState
+}
+
+// just remove non-serializable data
+function toStateChannel(channel){
+  return omitBy(channel, isFunction)
 }
 
 export function reducer(state = {}, action) {
   switch (action.type) {
-  case 'COMPONENT_DATA':
-    return reducerSet(state, action.id, action.subId, 'data', action.data)
-  case 'COMPONENT_LOADING':
-    return reducerSet(state, action.id, action.subId, 'loading', action.isLoading)
-  case 'COMPONENT_ERROR':
-    return reducerSet(state, action.id, action.subId, 'error', action.data)
+  case 'COMPONENT_MOUNT':
+    each(action.channels, channel => {
+      // merge in initial values. need to filter out garbage in case the channel
+      // is prop-ified, with stuff like load/setSettings
+      state = reducerSet(state, channel, toStateChannel(channel))
+    })
+    return state
+  case 'COMPONENT_UNMOUNT':
+    return destroyComponent(state, action.componentId)
+  case 'COMPONENT_LOAD_START':
+    return reducerSet(state, action.channel, {data: undefined, loading: true, error: undefined})
+  case 'COMPONENT_LOAD_ERROR':
+    return reducerSet(state, action.channel, {data: undefined, loading: false, error: action.error})
+  case 'COMPONENT_LOAD_SUCCESS':
+    return reducerSet(state, action.channel, {data: action.data, loading: false, error: undefined})
   case 'COMPONENT_SETTINGS':
-    return reducerSet(state, action.id, action.subId, 'settings', action.data)
+    return reducerSet(state, action.channel, {settings: action.settings})
   }
   return state
+}
+
+// pass this function a push function, and it'll return middleware for refux that calls that
+// push function with relevant query string values every time settings change
+export const queryStringMiddleware = push => {
+  const _settingsMiddleware = settingsMiddleware(push)
+  return store => next => action => {
+    switch(action.type){
+    case 'COMPONENT_SETTINGS':
+      return _settingsMiddleware(store, next, action)
+    case 'COMPONENT_MOUNT':
+      return mountComponentMiddleware(store, next, action)
+    case '@@router/LOCATION_CHANGE':
+      return locationChangeMiddleware(store, next, action)
+    default:
+      return next(action)
+    }
+  }
+}
+
+const settingsMiddleware = push => {
+  return (store, next, action) => {
+    const result = next(action)
+    if(action.type !== 'COMPONENT_SETTINGS') return result
+
+    const { channel, settings } = action
+    if(!channel.settingsToQueryString) return result
+
+    // filter settings down to qs-pushable settings for this channel
+    const currentQuery = store.getState().routing.locationBeforeTransitions.query
+    const qsSettings = pickBy(settings, (value, key) => {
+      return includes(channel.settingsToQueryString, key) && currentQuery[key] !== value
+    })
+    if(!size(qsSettings)) return result
+
+    // TODO: get current query and check for differences before pushing? or do histories not emit a change if the url is the same?
+
+    const currentPath = store.getState().routing.locationBeforeTransitions.pathname
+    store.dispatch(push({pathname: currentPath, query: qsSettings}))
+
+    return result
+  }
+}
+
+// grab query string from router when component mounts
+const mountComponentMiddleware = (store, next, action) => {
+  const query = store.getState().routing.locationBeforeTransitions.query
+  // TODO: instead of calling settings, lets just merge settins from the query string into the
+  // action's channels before calling next(), so we add query string settings to the initial state
+  setSettingsFromQuery(action.channels, query, store.dispatch)
+
+  return next(action)
+}
+
+const locationChangeMiddleware = (store, next, action) => {
+  const result = next(action)
+  if(action.type !== '@@router/LOCATION_CHANGE') return result
+  const components = store.getState().components
+  if(!components) return result
+
+  // grab all channel objects from all current components
+  const query = action.payload.query
+  const currentChannels = _(components).map(_.values).flatten().value()
+  setSettingsFromQuery(currentChannels, query, store.dispatch)
+
+  return result
+}
+
+function setSettingsFromQuery(channels, query, dispatch){
+  each(channels, channel => {
+    const settingsToPush = _(query).pick(channel.settingsToQueryString)
+      .pickBy((val, key) => channel.settings[key] !== val).value()
+
+    if(!size(settingsToPush)) return
+
+    dispatch(setSettings(channel, settingsToPush))
+  })
 }

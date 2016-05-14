@@ -7,22 +7,22 @@ import {search as searchItems} from '../data/items'
 import {Link, withRouter} from 'react-router'
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
-import {pick, isEqual} from 'lodash/fp'
+import {pick, isEqual, concat} from 'lodash'
 import {asyncify} from '../lib/asyncify'
 import Error from './Error'
 
-const itemFields = ["id", "sku", "title", "brand", "color", "size", "description",
+const itemFields = ["sku", "title", "brand", "color", "size", "description",
   "percSplit", "price", "printed"]
 
 function searchItemsWrapped(settings){
-  console.log("calling my async func")
+  console.log("calling my async func", settings)
   const { sortBy, page } = settings
   const filters = filterThemSettingsToTheFilters(settings)
   return searchItems(filters, sortBy, {perPage: 30, page})
 }
 
 function filterThemSettingsToTheFilters(settings){
-  return pick(itemFields, settings)
+  return pick(settings, itemFields)
 }
 
 export const Items = React.createClass({
@@ -46,12 +46,18 @@ export const Items = React.createClass({
     const _addFakeItems = e => { e.preventDefault(); addFakeItems() }
     const _deleteAllItems = e => { e.preventDefault(); deleteAllItems() }
 
-    const itemsContent = items.loading
-      ? <InnerLoading />
-      : (<div>
-        <Pagination total={items.data.count} pages={items.data.pages} page={parseInt(page)} onPage={this.paginate} />
-        <ItemList items={items.data.items} sort={this.sort} />
-      </div>)
+    let itemsContent;
+    if(items.error){
+      itemsContent = <Error message={items.error.title} />
+    }
+    else {
+      itemsContent = items.loading
+        ? <InnerLoading />
+        : (<div>
+          <Pagination total={items.data.count} pages={items.data.pages} page={parseInt(page)} onPage={this.paginate} />
+          <ItemList items={items.data.items} sort={this.sort} />
+        </div>)
+    }
 
     return <div>
       <Link to="/items/new">Add Item</Link><br />
@@ -59,9 +65,7 @@ export const Items = React.createClass({
       <a href="#" onClick={_addFakeItems}>Add Lots O' Items</a><br />
       <a href="#" onClick={_deleteAllItems}>Delete All</a>
       <ItemListFilter initialValues={filters} onSubmit={this.onFilterSubmit} />
-      {items.error
-        ? <Error message={items.error.title} />
-        : itemsContent}
+      {itemsContent}
     </div>
   }
 
@@ -74,6 +78,9 @@ const ReduxedItems = connect(undefined, {
 export const ItemsContainer = asyncify(ReduxedItems, "itemslist", {
   "items": {
     loading: true, load: searchItemsWrapped, onLoad: true, onChange: true,
-    settings: { page: 1, sortBy: "displayName" }
+    // TODO: maybe switch this out to have a settings object, and each setting key can set
+    // defaultValue, syncToQueryString, etc? could include datatype for serialization, de-serialization
+    settings: { page: 1, sortBy: "displayName" },
+    settingsToQueryString: concat(itemFields, ["page", "sortBy"])
   }
 })
