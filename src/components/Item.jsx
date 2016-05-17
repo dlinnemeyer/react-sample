@@ -5,7 +5,7 @@ import {loadConsignor} from '../actions/consignors'
 import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router'
 import InnerLoading from './InnerLoading'
-import {asyncify} from '../lib/asyncify'
+import {asyncify} from '../lib/asyncify/components'
 import Error from './Error'
 
 export const Item = React.createClass({

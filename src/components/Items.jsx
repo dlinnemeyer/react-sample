@@ -4,18 +4,17 @@ import ItemList from './ItemList'
 import ItemListFilter from './ItemListFilter'
 import {addFakeItems, deleteAllItems} from '../actions/items'
 import {search as searchItems} from '../data/items'
-import {Link, withRouter} from 'react-router'
+import {Link} from 'react-router'
 import InnerLoading from './InnerLoading'
 import Pagination from './Pagination'
 import {pick, isEqual, concat} from 'lodash'
-import {asyncify} from '../lib/asyncify'
+import {asyncify} from '../lib/asyncify/components'
 import Error from './Error'
 
 const itemFields = ["sku", "title", "brand", "color", "size", "description",
   "percSplit", "price", "printed"]
 
 function searchItemsWrapped(settings){
-  console.log("calling my async func", settings)
   const { sortBy, page } = settings
   const filters = filterThemSettingsToTheFilters(settings)
   return searchItems(filters, sortBy, {perPage: 30, page})
@@ -28,15 +27,15 @@ function filterThemSettingsToTheFilters(settings){
 export const Items = React.createClass({
 
   onFilterSubmit(data){
-    this.props.items.setSettings(data)
+    this.props.items.mergeSettings(data)
   },
 
   paginate(pageNumber){
-    this.props.items.setSettings({page: pageNumber})
+    this.props.items.mergeSettings({page: pageNumber})
   },
 
   sort(field){
-    this.props.items.setSettings({sortBy: field})
+    this.props.items.mergeSettings({sortBy: field})
   },
 
   render() {
@@ -73,7 +72,7 @@ export const Items = React.createClass({
 
 const ReduxedItems = connect(undefined, {
   addFakeItems, deleteAllItems
-})(withRouter(Items))
+})(Items)
 
 export const ItemsContainer = asyncify(ReduxedItems, "itemslist", {
   "items": {

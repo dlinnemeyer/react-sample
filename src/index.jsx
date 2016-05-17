@@ -10,7 +10,8 @@ import thunk from 'redux-thunk'
 import {syncHistoryWithStore, routerReducer, routerMiddleware, push} from 'react-router-redux'
 import {reducer as formReducer} from 'redux-form'
 import createLogger from 'redux-logger'
-import {queryStringMiddleware} from './lib/asyncify'
+import {queryStringMiddleware} from './lib/asyncify/middleware'
+import {reducer as asyncifyReducer} from './lib/asyncify/reducers'
 
 let middleware = [thunk, routerMiddleware(browserHistory), queryStringMiddleware(push)]
 if(process.env.NODE_ENV !== 'production'){
@@ -25,6 +26,7 @@ const createStoreWithMiddleware = compose(
 
 reducers.routing = routerReducer
 reducers.form = formReducer
+reducers.components = asyncifyReducer
 const store = createStoreWithMiddleware(combineReducers(reducers), initialState)
 
 const history = syncHistoryWithStore(browserHistory, store)

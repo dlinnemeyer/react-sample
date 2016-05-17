@@ -5,7 +5,7 @@ import ItemList from './ItemList'
 import {loadConsignor} from '../actions/consignors'
 import {searchItems} from '../actions/items'
 import InnerLoading from './InnerLoading'
-import {asyncify} from '../lib/asyncify'
+import {asyncify} from '../lib/asyncify/components'
 import Error from './Error'
 
 export const Consignor = React.createClass({

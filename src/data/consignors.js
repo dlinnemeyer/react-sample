@@ -2,7 +2,7 @@ import {promiseDelay} from './misc'
 import store from 'store'
 import {arrToHash} from '../misc'
 import {displayName} from '../models/consignor'
-import {toString, isNumber, isBoolean} from 'lodash'
+import _, {size, toString, isNumber, isBoolean} from 'lodash'
 
 // exported because we use it in certain hackish contexts for development reasons. should be removed
 // later
@@ -31,23 +31,32 @@ export function getAll(ids){
   })
 }
 
-export function search(data, sortBy){
+export function search(data = {}, sortBy = "displayName", {page = 1, perPage = 20}){
   return promiseDelay((resolve) => {
     const allConsignors = __getConsignors()
 
-    const consignors = {}
-    Object.keys(allConsignors).filter(id => {
+    // first, search filter and sort
+    const filteredIds = Object.keys(allConsignors).filter(id => {
       return searchCompare(data, allConsignors[id])
     }).sort((a, b) => {
       return sortCompare(allConsignors[a], allConsignors[b], sortBy)
-    }).forEach(id => {
-      consignors[id] = allConsignors[id]
     })
 
+    // now limit/offset
+    const total = size(filteredIds)
+    const start = (page - 1) * perPage
+    const end = start + perPage
+    const consignors = _(filteredIds).slice(start, end).map(id => allConsignors[id])
+      .keyBy("id").value()
 
-    resolve(consignors)
+    resolve({
+      consignors,
+      pages: Math.ceil(total / perPage),
+      count: total
+    })
   })
 }
+
 
 function sortCompare(a, b, sortBy){
   const aVal = getSortValue(a, sortBy)
