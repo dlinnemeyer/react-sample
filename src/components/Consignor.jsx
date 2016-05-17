@@ -2,8 +2,8 @@ import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
-import {loadConsignor} from '../actions/consignors'
-import {searchItems} from '../actions/items'
+import {get as getConsignor} from '../data/consignors'
+import {search as searchItems} from '../data/items'
 import InnerLoading from './InnerLoading'
 import {asyncify} from '../lib/asyncify/components'
 import Error from './Error'
@@ -24,6 +24,7 @@ export const Consignor = React.createClass({
     const { consignor, items } = this.props
 
     if(consignor.error) return <Error message={consignor.error.title} />
+    if(items.error) return <Error message={items.error.title} />
 
     return <div>
       {consignor.loading
@@ -41,9 +42,7 @@ Consignor.propTypes = {
   items: PropTypes.object.isRequired
 }
 
-const ReduxedConsignor = connect()(Consignor)
-
-export const ConsignorContainer = asyncify(ReduxedConsignor, "consignor", {
-  "consignor": {loading: true, load: loadConsignor },
+export const ConsignorContainer = asyncify(Consignor, "consignor", {
+  "consignor": {loading: true, load: getConsignor },
   "items": {load: searchItems}
 })

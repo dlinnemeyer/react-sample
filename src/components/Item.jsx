@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react'
 import ItemDetails from './ItemDetails'
-import {deleteItem, loadItem} from '../actions/items'
-import {loadConsignor} from '../actions/consignors'
+import {get as getItem, del as deleteItem} from '../data/items'
+import {get as getConsignor} from '../data/consignors'
 import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router'
 import InnerLoading from './InnerLoading'
@@ -14,17 +14,20 @@ export const Item = React.createClass({
   },
 
   componentWillMount(){
-    this.props.item.load(this.id()).then((item) => this.props.consignor.load(item.consignorid))
+    this.props.item.load(this.id())
+      .then(item => {console.log(item); this.props.consignor.load(item.consignorid)})
   },
 
   deleteItem(item){
-    this.props.del(item.id).then(() => browserHistory.push('/items'))
+    this.props.del(item)
+      .then(() => browserHistory.push('/items'))
   },
 
   render: function() {
     const { del, item, consignor } = this.props
 
     if(item.error) return <Error message={item.error.title} />
+    if(consignor.error) return <Error message={consignor.error.title} />
 
     return <div>
       {item.loading || consignor.loading
@@ -42,7 +45,7 @@ Item.propTypes = {
 }
 
 export const ItemContainer = asyncify(Item, "item", {
-  "consignor": {load: loadConsignor },
-  "item": {loading: true, load: loadItem},
+  "consignor": {loading: true, load: getConsignor },
+  "item": {loading: true, load: getItem},
   "del": {load: deleteItem}
 })

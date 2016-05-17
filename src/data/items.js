@@ -64,6 +64,7 @@ export function del(item){
 
 export function search(data = {}, sortBy = "displayName", {page = 1, perPage = 20}){
   return promiseDelay((resolve, reject) => {
+    console.log(data, sortBy, page, perPage)
     if(data.printed){
       reject({code: 172, title: "nO! no printed filter for you!"})
       return

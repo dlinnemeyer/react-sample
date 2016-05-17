@@ -4,6 +4,7 @@ env:
   node: true
 extends:
   - eslint:recommended
+  - plugin:react/recommended
 parserOptions:
   ecmaFeatures:
     jsx: true
@@ -50,7 +51,7 @@ rules:
 
   # react/jsx
   jsx-quotes: 1
-  react/jsx-no-undef: 1
+  #react/jsx-no-undef: 2
   react/jsx-pascal-case: 1
   react/no-danger: 2
   react/no-deprecated: 2
