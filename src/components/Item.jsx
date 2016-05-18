@@ -5,21 +5,30 @@ import {get as getConsignor} from '../data/consignors'
 import LoadingOverlay from './LoadingOverlay'
 import {browserHistory} from 'react-router'
 import InnerLoading from './InnerLoading'
-import {asyncify} from '../lib/asyncify/components'
+import {asyncify, channelPropType} from '../lib/asyncify/components'
 import Error from './Error'
 
 export const Item = React.createClass({
+  propTypes: {
+    consignor: channelPropType,
+    item: channelPropType,
+    del: channelPropType,
+    params: PropTypes.shape({
+      itemid: PropTypes.string.isRequired
+    }).isRequired
+  },
+
   id(){
     return this.props.params.itemid
   },
 
   componentWillMount(){
     this.props.item.load(this.id())
-      .then(item => {console.log(item); this.props.consignor.load(item.consignorid)})
+      .then(item => this.props.consignor.load(item.consignorid))
   },
 
   deleteItem(item){
-    this.props.del(item)
+    this.props.del.load(item)
       .then(() => browserHistory.push('/items'))
   },
 
@@ -37,12 +46,6 @@ export const Item = React.createClass({
     </div>
   }
 })
-
-Item.propTypes = {
-  consignor: PropTypes.object.isRequired,
-  item: PropTypes.object.isRequired,
-  del: PropTypes.object.isRequired
-}
 
 export const ItemContainer = asyncify(Item, "item", {
   "consignor": {loading: true, load: getConsignor },

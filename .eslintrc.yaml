@@ -45,7 +45,7 @@ rules:
   no-extend-native: 2
   no-native-reassign: 2
   no-shadow-restricted-names: 1
-  no-undefined: 1
+  # no-undefined: 1 turns out undefined is useful?
   no-array-constructor: 1
   no-new-object: 1
 

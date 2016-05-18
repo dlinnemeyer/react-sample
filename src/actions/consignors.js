@@ -1,4 +1,4 @@
-import {add, del, get, getAll, search, __getConsignors, __setConsignors} from "../data/consignors"
+import {add, __getConsignors, __setConsignors} from "../data/consignors"
 import {globalErrorize} from "./misc"
 import faker from "faker"
 
@@ -9,66 +9,7 @@ export function addConsignor(data){
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
     return add(data)
-      .then(consignor => {
-        dispatch(addConsignorAction(consignor))
-        // in case anyone else is chaining on this? though they probably shouldn't, since
-        // everything else should flow through redux actions/reducers?
-        return consignor
-      })
       .catch(globalErrorize(dispatch))
-  }
-}
-
-export function deleteConsignor(data){
-  return (dispatch) => {
-    return del(data)
-      .then(consignor => {
-        dispatch(deleteConsignorAction(consignor))
-        return consignor
-      })
-      .catch(globalErrorize(dispatch))
-  }
-}
-
-export function loadConsignor(id){
-  return (dispatch) => {
-    return get(id)
-      .then(consignor => {
-        dispatch(loadConsignorsAction({id: consignor}))
-        return consignor
-      })
-  }
-}
-
-export function loadConsignors(ids){
-  return (dispatch) => {
-    return getAll(ids)
-      .then(consignors => {
-        dispatch(loadConsignorsAction(consignors))
-        return consignors
-      })
-  }
-}
-
-export function searchConsignors(data, sortBy, {page, perPage}){
-  return dispatch => {
-    return search(data, sortBy)
-      .then(consignors => {
-        // TODO: not sure if this is worth abstracting? could at least make a generic
-        // loadModels("consignor", consignors)?
-        dispatch(loadConsignorsAction(consignors))
-
-        const ids = Object.keys(consignors)
-        const start = (page - 1) * perPage
-        const end = start + perPage
-        // TODO: change this? updating derived/async page data
-        return {
-          ids: ids.slice(start, end),
-          // consignors: ..., should include consignors. just makes things easier on the component end
-          pages: Math.ceil(ids.length / perPage),
-          count: ids.length
-        }
-      })
   }
 }
 
@@ -84,15 +25,11 @@ export function addFakeConsignors(num = 50){
     __getConsignors(),
     newConsignors
   ))
-
-  return loadConsignorsAction(newConsignors)
 }
 
 export function deleteAllConsignors(){
-  return dispatch => {
-    const all = __getConsignors()
+  return () => {
     __setConsignors({})
-    Object.keys(all).forEach(cid => dispatch(deleteConsignorAction(all[cid])))
   }
 }
 
@@ -112,20 +49,4 @@ function fakeConsignor(){
     email: faker.internet.email(),
     items: []
   }
-}
-
-// not sure what to call this? it's the pure action generator, as opposed to the thunk-ified one
-// we actually call from our code
-// should we really distinguish between adding a new consignor and loading new consignors into
-// state?
-function addConsignorAction(consignor){
-  return { type: 'ADD_CONSIGNOR', consignor }
-}
-
-function deleteConsignorAction(consignor){
-  return { type: 'DELETE_CONSIGNOR', consignor }
-}
-
-function loadConsignorsAction(consignors){
-  return { type: 'LOAD_CONSIGNORS', consignors }
 }

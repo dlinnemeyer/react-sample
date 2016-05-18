@@ -1,20 +1,23 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
 import BasicStats from './BasicStats'
 
-export const Dashboard = React.createClass({
-  render: function() {
-    return <div>
-      <p>This is the dashboard!</p>
-      <BasicStats consignorCount={this.props.consignorCount} itemCount={this.props.itemCount} />
-    </div>
-  }
-})
+export function Dashboard({consignorCount, itemCount}){
+  return <div>
+    <p>This is the dashboard!</p>
+    <BasicStats consignorCount={consignorCount} itemCount={itemCount} />
+  </div>
+}
+Dashboard.propTypes = {
+  consignorCount: PropTypes.number.isRequired,
+  itemCount: PropTypes.number.isRequired
+}
 
-function mapStateToProps(state){
+// need to get some real async calls together for this?
+function mapStateToProps(){
   return {
-    consignorCount: Object.keys(state.consignors).length,
-    itemCount: Object.keys(state.items).length
+    consignorCount: 17,
+    itemCount: 23
   }
 }
 

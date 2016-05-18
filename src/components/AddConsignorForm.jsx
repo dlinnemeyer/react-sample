@@ -1,5 +1,6 @@
-import React, {PropTypes} from 'react'
+import React from 'react'
 import {reduxForm} from 'redux-form'
+import {reduxFormPropTypes} from '../misc'
 
 const fields = ["firstName", "lastName", "company", "isStoreAccount", "defaultPercSplit",
   "address", "address2", "city", "state", "zip", "email"]
@@ -21,58 +22,49 @@ const validate = values => {
   return errors
 }
 
-const AddConsignorForm = React.createClass({
-  render(){
-    const {
-      fields: { firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
-        city, state, zip, email },
-      // redux-form provided helpers
-      error, handleSubmit, submitting, submitFailed
-    } = this.props
+function AddConsignorForm(props){
+  const {
+    fields: { firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
+      city, state, zip, email },
+    // redux-form provided helpers
+    error, handleSubmit, submitting, submitFailed
+  } = props
 
-    return <form onSubmit={handleSubmit}>
-      <p>
-        <input type="text" placeholder="Email" {...email} />
-        {email.touched && email.error && <span className="error">{email.error}</span>}
-      </p>
-      <p>
-        <input type="text" placeholder="First Name" {...firstName} />
-        <input type="text" placeholder="Last Name" {...lastName} />
-        <input type="text" placeholder="Company" {...company} />
-      </p>
-      <p>
-        <label>
-          <input type="checkbox" {...isStoreAccount} />
-          Store Account
-        </label>
-        <input type="text" placeholder="Split" {...defaultPercSplit} />
-        {defaultPercSplit.touched && defaultPercSplit.error && <span className="error">{defaultPercSplit.error}</span>}
-      </p>
-      <p>
-        <input type="text" placeholder="Address" {...address} />
-        <input type="text" placeholder="Address 2" {...address2} />
-      </p>
-      <p>
-        <input type="text" placeholder="City" {...city} />
-        <input type="text" placeholder="State" {...state} />
-        <input type="text" placeholder="Zip" {...zip} />
-      </p>
-      {submitFailed && error && <span className="error">{error}</span>}
-      <p>
-        <input type="submit" value="Add Consignor" disabled={submitting} />
-        {submitting && <img src="/img/loading.gif" />}
-      </p>
-    </form>
-  }
-})
-
-AddConsignorForm.propTypes = {
-  fields: PropTypes.object.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
-  error: PropTypes.string,
-  resetForm: PropTypes.func.isRequired,
-  submitting: PropTypes.bool.isRequired
+  return <form onSubmit={handleSubmit}>
+    <p>
+      <input type="text" placeholder="Email" {...email} />
+      {email.touched && email.error && <span className="error">{email.error}</span>}
+    </p>
+    <p>
+      <input type="text" placeholder="First Name" {...firstName} />
+      <input type="text" placeholder="Last Name" {...lastName} />
+      <input type="text" placeholder="Company" {...company} />
+    </p>
+    <p>
+      <label>
+        <input type="checkbox" {...isStoreAccount} />
+        Store Account
+      </label>
+      <input type="text" placeholder="Split" {...defaultPercSplit} />
+      {defaultPercSplit.touched && defaultPercSplit.error && <span className="error">{defaultPercSplit.error}</span>}
+    </p>
+    <p>
+      <input type="text" placeholder="Address" {...address} />
+      <input type="text" placeholder="Address 2" {...address2} />
+    </p>
+    <p>
+      <input type="text" placeholder="City" {...city} />
+      <input type="text" placeholder="State" {...state} />
+      <input type="text" placeholder="Zip" {...zip} />
+    </p>
+    {submitFailed && error && <span className="error">{error}</span>}
+    <p>
+      <input type="submit" value="Add Consignor" disabled={submitting} />
+      {submitting && <img src="/img/loading.gif" />}
+    </p>
+  </form>
 }
+AddConsignorForm.propTypes = reduxFormPropTypes(fields)
 
 export default reduxForm({
   form: 'addConsignor',

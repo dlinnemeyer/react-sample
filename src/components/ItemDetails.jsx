@@ -1,24 +1,28 @@
 import React, {PropTypes} from 'react'
-import {displayName as itemDisplayName} from '../models/item'
-import {linkPath, displayName} from '../models/consignor'
+import {displayName as itemDisplayName, propType as itemPropType} from '../models/item'
+import {linkPath, displayName, propType as consignorPropType} from '../models/consignor'
 import {Link} from 'react-router'
 
-const ItemList = React.createClass({
+export default React.createClass({
+  propTypes: {
+    item: itemPropType,
+    consignor: consignorPropType,
+    deleteItem: PropTypes.func.isRequired
+  },
+
+  del(){
+    this.props.deleteItem(this.props.item)
+  },
+
   render: function() {
-    const del = () => this.props.deleteItem(this.props.item)
+    const {item, consignor} = this.props
     return <div>
-      <h2>{itemDisplayName(this.props.item)}</h2>
-      <p><a href="#" onClick={del}>delete</a></p>
-      <p>${this.props.item.price}</p>
-      <p><Link to={linkPath(this.props.consignor)}>
-        {displayName(this.props.consignor)}
+      <h2>{itemDisplayName(item)}</h2>
+      <p><a href="#" onClick={this.del}>delete</a></p>
+      <p>${item.price}</p>
+      <p><Link to={linkPath(consignor)}>
+        {displayName(consignor)}
       </Link></p>
     </div>
   }
 })
-
-ItemList.propTypes = {
-  deleteItem: PropTypes.func.isRequired
-}
-
-export default ItemList

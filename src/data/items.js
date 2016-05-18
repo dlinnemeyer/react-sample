@@ -1,8 +1,7 @@
 import {promiseDelay} from './misc'
 import store from 'store'
-import {arrToHash} from '../misc'
 import {__getConsignors, __setConsignors} from './consignors'
-import _, {size, isUndefined, isNumber, isBoolean, toString} from 'lodash'
+import _, {size, isUndefined, isNumber, isBoolean, toString, keyBy} from 'lodash'
 
 export function __getItems(){
   return store.get("items") || {}
@@ -24,7 +23,7 @@ export function getAll(ids){
     const allItems = __getItems()
     const items = isUndefined(ids)
       ? allItems
-      : arrToHash(ids.map(id => allItems[id]).filter(c => !!(c)))
+      : keyBy(ids.map(id => allItems[id]).filter(c => !!(c)), "id")
     resolve(items)
   })
 }
@@ -64,7 +63,6 @@ export function del(item){
 
 export function search(data = {}, sortBy = "displayName", {page = 1, perPage = 20}){
   return promiseDelay((resolve, reject) => {
-    console.log(data, sortBy, page, perPage)
     if(data.printed){
       reject({code: 172, title: "nO! no printed filter for you!"})
       return

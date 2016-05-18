@@ -1,12 +1,11 @@
 import React from 'react'
-import {displayName} from '../models/consignor'
+import {displayName, propType} from '../models/consignor'
 import Address from './Address'
 
-export default React.createClass({
-  render: function() {
-    return <div>
-      <h2>{displayName(this.props.consignor)}</h2>
-      <Address name={displayName(this.props.consignor)} {...this.props.consignor} />
-    </div>
-  }
-})
+export default function ConsignorDetails({consignor}){
+  return <div>
+    <h2>{displayName(consignor)}</h2>
+    <Address name={displayName(consignor)} {...consignor} />
+  </div>
+}
+ConsignorDetails.propTypes = {consignor: propType}

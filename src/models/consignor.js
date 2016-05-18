@@ -1,3 +1,5 @@
+import {PropTypes} from 'react'
+
 export function displayName(consignor){
   return consignor.company
     ? consignor.company
@@ -5,8 +7,24 @@ export function displayName(consignor){
 }
 
 export function linkPath(consignor){
-  return `/consignors/${encodeURIComponent(consignor.id)}`;
+  return `/consignors/${encodeURIComponent(consignor.id)}`
 }
+
+export const propType = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  firstName: PropTypes.string.isRequired,
+  lastName: PropTypes.string.isRequired,
+  company: PropTypes.string.isRequired,
+  isStoreAccount: PropTypes.bool.isRequired,
+  defaultPercSplit: PropTypes.number.isRequired,
+  address: PropTypes.string.isRequired,
+  address2: PropTypes.string.isRequired,
+  city: PropTypes.string.isRequired,
+  state: PropTypes.string.isRequired,
+  zip: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  items: PropTypes.arrayOf(PropTypes.string).isRequired
+})
 
 
 // this probably shouldn't be here? the other two functions operate on individual consignor models.

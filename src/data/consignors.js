@@ -1,8 +1,7 @@
 import {promiseDelay} from './misc'
 import store from 'store'
-import {arrToHash} from '../misc'
 import {displayName} from '../models/consignor'
-import _, {size, toString, isNumber, isBoolean} from 'lodash'
+import _, {size, toString, isNumber, isBoolean, keyBy} from 'lodash'
 
 // exported because we use it in certain hackish contexts for development reasons. should be removed
 // later
@@ -25,7 +24,7 @@ export function getAll(ids){
   return promiseDelay((resolve) => {
     const allConsignors = __getConsignors()
     const consignors = ids
-      ? arrToHash(ids.map(id => allConsignors[id]).filter(c => !!(c)))
+      ? keyBy(ids.map(id => allConsignors[id]).filter(c => !!(c)), "id")
       : allConsignors
     resolve(consignors)
   })

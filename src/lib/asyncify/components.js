@@ -114,6 +114,16 @@ export function asyncify(Component, componentId, channels = {}){
   return connect(mapStateToProps, mapDispatchToProps, mergeProps)(wrapper)
 }
 
+export const channelPropType = PropTypes.shape({
+  loading: PropTypes.bool.isRequired,
+  load: PropTypes.func.isRequired,
+  mergeSettings: PropTypes.func.isRequired,
+  replaceSettings: PropTypes.func.isRequired,
+  error: PropTypes.any,
+  data: PropTypes.any,
+  settings: PropTypes.object
+}).isRequired
+
 const defaultChannel = {
   loading: false,
   //error, leaving error undefined so we can do nice if(!ch.error) stuffs

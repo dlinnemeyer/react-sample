@@ -4,7 +4,7 @@ import {Router, browserHistory} from 'react-router'
 import {createStore, applyMiddleware, compose, combineReducers} from 'redux'
 import {Provider} from 'react-redux'
 import reducers from './reducers/index'
-import {initialState} from './initialState.js'
+import {initialState} from './initialState'
 import routes from './routes'
 import thunk from 'redux-thunk'
 import {syncHistoryWithStore, routerReducer, routerMiddleware, push} from 'react-router-redux'
@@ -13,7 +13,7 @@ import createLogger from 'redux-logger'
 import {queryStringMiddleware} from './lib/asyncify/middleware'
 import {reducer as asyncifyReducer} from './lib/asyncify/reducers'
 
-let middleware = [thunk, routerMiddleware(browserHistory), queryStringMiddleware(push)]
+const middleware = [thunk, routerMiddleware(browserHistory), queryStringMiddleware(push)]
 if(process.env.NODE_ENV !== 'production'){
   middleware.push(require('redux-immutable-state-invariant')())
   middleware.push(createLogger({collapsed: true}))

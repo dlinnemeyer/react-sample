@@ -1,10 +1,14 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
 import AddConsignorForm from './AddConsignorForm'
 import {addConsignor} from '../actions/consignors'
 import {browserHistory} from 'react-router'
 
 export const AddConsignor = React.createClass({
+  propTypes: {
+    addConsignor: PropTypes.func.isRequired
+  },
+
   onSubmit(data){
     // should we just dispatch(addConsignor(data)) instead of doing the redux-action-binding thing?
     // seems more transparent?
@@ -31,11 +35,4 @@ export const AddConsignor = React.createClass({
   }
 })
 
-function mapStateToProps(){
-  return {
-  }
-}
-
-export const AddConsignorContainer = connect(
-  mapStateToProps, {addConsignor}
-)(AddConsignor)
+export const AddConsignorContainer = connect(undefined, {addConsignor})(AddConsignor)

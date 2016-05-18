@@ -1,3 +1,5 @@
+import {PropTypes} from 'react'
+
 export const displayName = function(item){
   // get all non-empty values for the optional fields
   const extras = ['brand', 'color', 'size'].map(f => item[f]).filter(v => v && v.length > 0)
@@ -13,6 +15,19 @@ export const linkPath = function(item){
   return `/items/${encodeURIComponent(item.id)}`
 }
 
+export const propType = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  sku: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  brand: PropTypes.string.isRequired,
+  color: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  percSplit: PropTypes.string.isRequired,
+  price: PropTypes.string.isRequired,
+  printed: PropTypes.bool.isRequired,
+  consignorid: PropTypes.string.isRequired
+})
 
 // this probably shouldn't be here? the other two functions operate on individual consignor models.
 // this function is a function of state, though. Maybe a file or directory of state helper retrieval

@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react'
-import {linkPath} from '../models/item'
+import {linkPath, propType as itemPropType} from '../models/item'
 import {Link} from 'react-router'
 import {toString} from 'lodash'
 
@@ -7,26 +7,34 @@ const fields = ["sku", "title", "brand", "color", "size", "description", "percSp
   "price", "printed"]
 
 const FieldHeading = React.createClass({
+  propTypes: {
+    sort: PropTypes.func,
+    field: PropTypes.string.isRequired,
+    sorted: PropTypes.bool.isRequired
+  },
+
   sort(){
     if(!this.props.sort) return
-
     return this.props.sort(this.props.field)
   },
 
   render(){
+    const field = this.props.sorted
+      ? `${this.props.field} \\/`
+      : this.props.field
     return <th style={{textAlign: "left"}}>
-      <span style={{cursor: "pointer"}} onClick={this.sort}>{this.props.field}</span>
+      <span style={{cursor: "pointer"}} onClick={this.sort}>{field}</span>
     </th>
   }
 })
 
-const ItemList = React.createClass({
-  render: function() {
-    const {items, sort} = this.props
-    return <table>
+function ItemList({items, sort, currentSort}){
+  return <table>
     <thead>
       <tr>
-        {fields.map(field => <FieldHeading key={field} field={field} sort={this.props.sort} />)}
+        {fields.map(field => {
+          return <FieldHeading key={field} field={field} sort={sort} sorted={field == currentSort} />
+        })}
       </tr>
     </thead>
     <tbody>
@@ -44,11 +52,11 @@ const ItemList = React.createClass({
       })}
     </tbody>
     </table>
-  }
-})
-
+}
 ItemList.propTypes = {
-  sort: PropTypes.func
+  sort: PropTypes.func,
+  items: PropTypes.objectOf(itemPropType).isRequired,
+  currentSort: PropTypes.string.isRequired
 }
 
 export default ItemList

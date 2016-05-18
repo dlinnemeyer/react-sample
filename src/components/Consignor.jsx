@@ -1,14 +1,20 @@
 import React, {PropTypes} from 'react'
-import {connect} from 'react-redux'
 import ConsignorDetails from './ConsignorDetails'
 import ItemList from './ItemList'
 import {get as getConsignor} from '../data/consignors'
 import {search as searchItems} from '../data/items'
 import InnerLoading from './InnerLoading'
-import {asyncify} from '../lib/asyncify/components'
+import {asyncify, channelPropType} from '../lib/asyncify/components'
 import Error from './Error'
 
 export const Consignor = React.createClass({
+  propTypes: {
+    consignor: channelPropType,
+    items: channelPropType,
+    params: PropTypes.shape({
+      consignorid: PropTypes.string.isRequired
+    }).isRequired
+  },
 
   id(){
     return this.props.params.consignorid
@@ -36,11 +42,6 @@ export const Consignor = React.createClass({
     </div>
   }
 })
-
-Consignor.propTypes = {
-  consignor: PropTypes.object.isRequired,
-  items: PropTypes.object.isRequired
-}
 
 export const ConsignorContainer = asyncify(Consignor, "consignor", {
   "consignor": {loading: true, load: getConsignor },

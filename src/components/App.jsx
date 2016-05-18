@@ -1,9 +1,13 @@
-import React from 'react'
+import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
 import {Link} from 'react-router'
 import GlobalError from './GlobalError'
 
 const App = React.createClass({
+  propTypes: {
+    globalError: PropTypes.string,
+    children: PropTypes.element
+  },
   render: function() {
     return <div id="wrapper">
       <nav>

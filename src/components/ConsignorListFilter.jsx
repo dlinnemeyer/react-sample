@@ -3,21 +3,21 @@
  * We're doing on-submit instead of onchange here to reduce server calls? though onblur would
  * probably be better?
  */
-import React, {PropTypes} from 'react'
+import React from 'react'
 import {reduxForm} from 'redux-form'
+import {reduxFormPropTypes} from '../misc'
 
 const fields = ["firstName", "lastName", "company", "isStoreAccount", "defaultPercSplit",
   "address", "address2", "city", "state", "zip", "email"]
 
-const ConsignorListFilter = React.createClass({
-  render(){
+function ConsignorListFilter(props){
     const {
       fields: {
         firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
         city, state, zip, email
       },
       handleSubmit, submitting
-    } = this.props
+    } = props
 
     return <form onSubmit={handleSubmit}>
       <p>
@@ -45,16 +45,8 @@ const ConsignorListFilter = React.createClass({
         {submitting && <img src="/img/loading.gif" />}
       </p>
     </form>
-  }
-})
-
-ConsignorListFilter.propTypes = {
-  fields: PropTypes.object.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
-  error: PropTypes.string,
-  resetForm: PropTypes.func.isRequired,
-  submitting: PropTypes.bool.isRequired
 }
+ConsignorListFilter.propTypes = reduxFormPropTypes(fields)
 
 export default reduxForm({
   form: 'filterConsignorList',
