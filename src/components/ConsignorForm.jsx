@@ -22,7 +22,7 @@ const validate = values => {
   return errors
 }
 
-function AddConsignorForm(props){
+function ConsignorForm(props){
   const {
     fields: { firstName, lastName, company, isStoreAccount, defaultPercSplit, address, address2,
       city, state, zip, email },
@@ -59,15 +59,15 @@ function AddConsignorForm(props){
     </p>
     {submitFailed && error && <span className="error">{error}</span>}
     <p>
-      <input type="submit" value="Add Consignor" disabled={submitting} />
+      <input type="submit" value="Submit" disabled={submitting} />
       {submitting && <img src="/img/loading.gif" />}
     </p>
   </form>
 }
-AddConsignorForm.propTypes = reduxFormPropTypes(fields)
+ConsignorForm.propTypes = reduxFormPropTypes(fields)
 
 export default reduxForm({
   form: 'addConsignor',
   fields,
   validate
-})(AddConsignorForm)
+})(ConsignorForm)

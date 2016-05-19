@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react'
 import {connect} from 'react-redux'
-import AddConsignorForm from './AddConsignorForm'
+import ConsignorForm from './ConsignorForm'
 import {addConsignor} from '../actions/consignors'
 import {browserHistory} from 'react-router'
 
@@ -31,7 +31,7 @@ export const AddConsignor = React.createClass({
   },
 
   render(){
-    return <AddConsignorForm onSubmit={this.onSubmit} />
+    return <ConsignorForm onSubmit={this.onSubmit} />
   }
 })
 

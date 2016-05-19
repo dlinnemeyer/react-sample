@@ -1,7 +1,7 @@
 import {promiseDelay} from './misc'
 import store from 'store'
 import {displayName} from '../models/consignor'
-import _, {size, toString, isNumber, isBoolean, keyBy} from 'lodash'
+import _, {includes, has, assign, size, toString, isNumber, isBoolean, keyBy} from 'lodash'
 
 // exported because we use it in certain hackish contexts for development reasons. should be removed
 // later
@@ -121,6 +121,35 @@ export function add(consignor){
     consignors[consignor.id] = consignor
     __setConsignors(consignors)
     resolve(consignor)
+  })
+}
+
+export function edit(consignor){
+  return promiseDelay((resolve, reject) => {
+    const consignors = __getConsignors()
+
+    if(!has(consignors, consignor.id)){
+      reject({code: 27, title: "invalid_consignorid"})
+      return
+    }
+
+    if(consignor.email){
+      const otherEmails = _(consignors)
+        .filter(c => c.id !== consignor.id)
+        .map(c => c.email)
+        .value()
+
+      if(includes(otherEmails, consignor.email)){
+        reject({code: 23, title: "duplicate_email"})
+        return
+      }
+    }
+
+    // merge, in case we're only edit a single field
+    const mergedConsignor = assign({}, consignors[consignor.id], consignor)
+    consignors[consignor.id] = mergedConsignor
+    __setConsignors(consignors)
+    resolve(mergedConsignor)
   })
 }
 

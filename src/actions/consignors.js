@@ -1,4 +1,4 @@
-import {add, __getConsignors, __setConsignors} from "../data/consignors"
+import {add, edit, __getConsignors, __setConsignors} from "../data/consignors"
 import {globalErrorize} from "./misc"
 import faker from "faker"
 
@@ -9,6 +9,17 @@ export function addConsignor(data){
     // Or should we find a way to defer a global error handling? Somehow only run it if nothing
     // else handles the error?
     return add(data)
+      .catch(globalErrorize(dispatch))
+  }
+}
+
+export function editConsignor(data){
+  return (dispatch) => {
+    // We don't bother with error handling on this promise. We don't have any global error handling
+    // to do, and components actually calling this action can catch errors.
+    // Or should we find a way to defer a global error handling? Somehow only run it if nothing
+    // else handles the error?
+    return edit(data)
       .catch(globalErrorize(dispatch))
   }
 }

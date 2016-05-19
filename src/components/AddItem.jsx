@@ -54,4 +54,3 @@ export const AddItem = React.createClass({
 export const AddItemContainer = asyncify(AddItem, "additem", {
   "consignors": {loading: true, load: getAllConsignors}
 })
-
