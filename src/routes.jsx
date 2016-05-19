@@ -4,6 +4,7 @@ import {AppContainer} from './components/App'
 import {ItemsContainer} from './components/Items'
 import {ItemContainer} from './components/Item'
 import {AddItemContainer} from './components/AddItem'
+import {EditItemContainer} from './components/EditItem'
 import {ConsignorsContainer} from './components/Consignors'
 import {ConsignorContainer} from './components/Consignor'
 import {DashboardContainer} from './components/Dashboard'
@@ -19,4 +20,5 @@ export default <Route path="/" component={AppContainer}>
   <Route path="/items" component={ItemsContainer} />
   <Route path="/items/new" component={AddItemContainer} />
   <Route path="/items/:itemid" component={ItemContainer} />
+  <Route path="/items/:itemid/edit" component={EditItemContainer} />
 </Route>

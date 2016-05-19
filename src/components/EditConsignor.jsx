@@ -35,7 +35,7 @@ export const EditConsignor = React.createClass({
         let formErr = {}
         switch(err.title){
           case 'duplicate_email':
-            formErr = {email: "That email is already in use by another consignor."}
+            formErr = {_error: "That email is already in use by another consignor."}
             break
           case 'invalid_consignorid':
             formErr = {email: "That's an invalid consignor."}

@@ -1,5 +1,5 @@
 import React from 'react'
-import AddItemForm from './AddItemForm'
+import ItemForm from './ItemForm'
 import {add as addItem} from '../data/items'
 import {getAll as getAllConsignors} from '../data/consignors'
 import {browserHistory} from 'react-router'
@@ -47,7 +47,7 @@ export const AddItem = React.createClass({
 
     return consignors.loading
       ? <InnerLoading />
-      : <AddItemForm onSubmit={this.onSubmit} consignors={consignors.data} />
+      : <ItemForm onSubmit={this.onSubmit} consignors={consignors.data} />
   }
 })
 

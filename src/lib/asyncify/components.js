@@ -140,18 +140,30 @@ const defaultChannel = {
 // whatever data is returned by the promise is set to data when the promise resolves, and the same
 // goes for errors
 function thunkifyAndWrap(func, channel){
+  // set aside a placeholder for the latest request on this channel. when a promise returns, we'll
+  // compare promise object ids. if they don't match, we reject the promise with an undefined
+  // error, so it isn't treated like a real error by the rest of the tool
+  let currentPromise
   return (...args) => {
     return dispatch => {
       dispatch(loadStart(channel))
-      return func(...args)
+      const promise = func(...args)
         .then(response => {
+          if(promise !== currentPromise){
+            return Promise.reject()
+          }
           dispatch(loadSuccess(channel, response))
           return response
         })
         .catch(error => {
+          if(promise !== currentPromise){
+            return
+          }
           dispatch(loadError(channel, error))
           return error
         })
+      currentPromise = promise
+      return promise
     }
   }
 }

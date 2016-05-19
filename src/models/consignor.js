@@ -6,8 +6,17 @@ export function displayName(consignor){
     : `${consignor.firstName} ${consignor.lastName}`
 }
 
-export function linkPath(consignor){
-  return `/consignors/${encodeURIComponent(consignor.id)}`
+export function linkPath(consignor, type = "view"){
+  let append
+  switch(type){
+    case 'view':
+      append = ""
+      break
+    case 'edit':
+      append = "/edit"
+      break
+  }
+  return `/consignors/${encodeURIComponent(consignor.id)}${append}`
 }
 
 export const propType = PropTypes.shape({

@@ -11,8 +11,17 @@ export const displayName = function(item){
   return `${item.title} ${extraString} [#${item.sku}]`
 }
 
-export const linkPath = function(item){
-  return `/items/${encodeURIComponent(item.id)}`
+export function linkPath(item, type = "view"){
+  let append
+  switch(type){
+    case 'view':
+      append = ""
+      break
+    case 'edit':
+      append = "/edit"
+      break
+  }
+  return `/items/${encodeURIComponent(item.id)}${append}`
 }
 
 export const propType = PropTypes.shape({

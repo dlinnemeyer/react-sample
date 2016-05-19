@@ -42,7 +42,7 @@ export function reducer(state = {}, action) {
   case 'COMPONENT_UNMOUNT':
     return destroyComponent(state, action.componentId)
   case 'COMPONENT_LOAD_START':
-    return mergeChannel(state, action.channel, {data: undefined, loading: true, error: undefined, hasInitializedLoading: true})
+    return mergeChannel(state, action.channel, {loading: true, hasInitializedLoading: true})
   case 'COMPONENT_LOAD_ERROR':
     return mergeChannel(state, action.channel, {data: undefined, loading: false, error: action.error})
   case 'COMPONENT_LOAD_SUCCESS':

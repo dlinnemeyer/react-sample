@@ -1,7 +1,8 @@
 import {promiseDelay} from './misc'
 import store from 'store'
 import {__getConsignors, __setConsignors} from './consignors'
-import _, {size, isUndefined, isNumber, isBoolean, toString, keyBy} from 'lodash'
+import _, {includes, has, assign, size, isUndefined, isNumber, isBoolean, toString, keyBy} from 'lodash'
+import faker from "faker"
 
 export function __getItems(){
   return store.get("items") || {}
@@ -9,6 +10,16 @@ export function __getItems(){
 
 export function __setItems(items){
   return store.set("items", items)
+}
+
+export function getPriceMessage(item){
+  return promiseDelay(resolve => {
+    resolve({
+      message: item.brand
+        ? `The average price for ${item.brand} is ${faker.commerce.price(0, 200)}`
+        : ""
+    })
+  })
 }
 
 export function get(id){
@@ -49,6 +60,35 @@ export function add(item){
     consignors[item.consignorid] = consignor
     __setConsignors(consignors)
     resolve(item)
+  })
+}
+
+export function edit(item){
+  return promiseDelay((resolve, reject) => {
+    const items = __getItems()
+
+    if(!has(items, item.id)){
+      reject({code: 27, title: "invalid_itemid"})
+      return
+    }
+
+    if(item.sku){
+      const otherSkus = _(items)
+        .filter(c => c.id !== item.id)
+        .map(c => c.sku)
+        .value()
+
+      if(includes(otherSkus, item.sku)){
+        reject({code: 23, title: "duplicate_sku"})
+        return
+      }
+    }
+
+    // merge, in case we're only edit a single field
+    const mergedItem = assign({}, items[item.id], item)
+    items[item.id] = mergedItem
+    __setItems(items)
+    resolve(mergedItem)
   })
 }
 
