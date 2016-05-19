@@ -31,7 +31,7 @@ export function getAll(ids){
 }
 
 export function search(data = {}, sortBy = "displayName", {page = 1, perPage = 20}){
-  return promiseDelay((resolve) => {
+  return promiseDelay(resolve => {
     const allConsignors = __getConsignors()
 
     // first, search filter and sort
