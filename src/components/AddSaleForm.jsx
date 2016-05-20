@@ -18,27 +18,95 @@ const fields = [
   "payments[].type",
   "payments[].amount",
   "payments[].checkNumber",
-  "storeDiscount",
-  "consignorid"
+  "storeDiscount"
 ]
+
+const LineItem = React.createClass({
+  render(){
+    const { id, sku, originalPrice, title, discount, taxExempt } = this.props
+    return <div>
+      <input type="hidden" {...id} />
+      <input type="text" placeholder="sku" {...sku} />
+      <input type="text" placeholder="price" {...originalPrice} />
+      <input type="text" placeholder="title" {...title} />
+      <input type="text" placeholder="discount" {...discount} />
+      <input type="checkbox" {...taxExempt} />
+    </div>
+  }
+})
+
+const Payment = React.createClass({
+  render(){
+    const { type, amount, checkNumber } = this.props
+    return <div>
+      <span>{type.value}</span>
+      <input type="hidden" {...type} />
+      <input type="text" {...amount} />
+      {type.value === "check"
+        ? <input type="text" {...checkNumber} />
+        : null}
+    </div>
+  }
+})
 
 const AddSaleForm = React.createClass({
   propTypes: reduxFormPropTypes(fields),
 
+  // TODO: we can memo-ize addPayment so we don't need this
+  addCheck(){ return this.addPayment("check") },
+  addCreditCard(){ return this.addPayment("credit_card") },
+  addCash(){ return this.addPayment("cash") },
+
+  addPayment(type){
+    return this.props.fields.payments.addField({type, amount: "0.00"})
+  },
+
+  addLineItem(){
+    return this.props.fields.lineItems.addField({})
+  },
+
+  componentDidUpdate(){
+    console.log(this.props.values)
+  },
+
   render(){
     const {
-      fields: { salesTax },
+      fields: { salesTax, lineItems, payments, storeDiscount },
       // redux-form provided helpers
       error, handleSubmit, submitting, submitFailed
     } = this.props
 
     return <form onSubmit={handleSubmit}>
-      <p>
+      <div>
+      </div>
+      <div>
         <input type="text" placeholder="salesTax" {...salesTax} />
         {salesTax.touched && salesTax.error && <span className="error">{salesTax.error}</span>}
-      </p>
-      {submitFailed && error && <span className="error">{error}</span>}
+      </div>
+
+      <div>
+        <a href="#" onClick={this.addLineItem}>Add Item</a>
+      </div>
+      <div>
+        {lineItems.map((lineItem, i) => <LineItem key={i} {...lineItem} />)}
+      </div>
+
+      <div>
+        <a href="#" onClick={this.addCheck}>Check</a><br />
+        <a href="#" onClick={this.addCreditCard}>Credit Card</a><br />
+        <a href="#" onClick={this.addCash}>Cash</a><br />
+      </div>
+      <div>
+        {payments.map((payment, i) => <Payment key={i} {...payment} />)}
+      </div>
+
+      <div>
+        <input type="text" placeholder="storeDiscount" {...storeDiscount} />
+        {storeDiscount.touched && storeDiscount.error && <span className="error">{storeDiscount.error}</span>}
+      </div>
+
       <p>
+        {submitFailed && error && <span className="error">{error}</span>}
         <input type="submit" value="Submit" disabled={submitting} />
         {submitting && <img src="/img/loading.gif" />}
       </p>
