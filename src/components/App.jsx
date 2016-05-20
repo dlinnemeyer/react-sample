@@ -13,7 +13,8 @@ const App = React.createClass({
       <nav>
         <Link to="/">Dashboard</Link>{" "}
         <Link to="/consignors">Consignors</Link>{" "}
-        <Link to="/items">Items</Link>
+        <Link to="/items">Items</Link>{" "}
+        <Link to="/sales/new">Add Sale</Link>
       </nav>
       {this.props.globalError && <GlobalError message={this.props.globalError} />}
       {this.props.children}
