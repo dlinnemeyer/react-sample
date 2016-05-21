@@ -8,6 +8,8 @@ extends:
 parserOptions:
   ecmaFeatures:
     jsx: true
+    experimentalObjectRestSpread: true
+    impliedStrict: true
   ecmaVersion: 6
   sourceType: module
 plugins:

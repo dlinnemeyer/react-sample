@@ -1,6 +1,8 @@
 import React from 'react'
+import {connect} from 'react-redux'
 import {reduxForm} from 'redux-form'
 import {reduxFormPropTypes} from '../misc'
+import {fromForm as saleFromForm} from '../models/sales'
 
 // keep in mind, this should only summarize the actual input fields, not all the computed values.
 // we'll need to define a sale object model, and we'll need functions to convert from sale to
@@ -17,13 +19,15 @@ const fields = [
   "lineItems[].taxExempt",
   "payments[].type",
   "payments[].amount",
-  "payments[].checkNumber",
-  "storeDiscount"
+  "payments[].checkNumber"
 ]
 
 const LineItem = React.createClass({
   render(){
-    const { id, sku, originalPrice, title, discount, taxExempt } = this.props
+    const {
+      fields: { id, sku, originalPrice, title, discount, taxExempt },
+      calculated: { discountedPrice }
+    } = this.props
     return <div>
       <input type="hidden" {...id} />
       <input type="text" placeholder="sku" {...sku} />
@@ -31,6 +35,7 @@ const LineItem = React.createClass({
       <input type="text" placeholder="title" {...title} />
       <input type="text" placeholder="discount" {...discount} />
       <input type="checkbox" {...taxExempt} />
+      <span> {discountedPrice}</span>
     </div>
   }
 })
@@ -73,25 +78,30 @@ const AddSaleForm = React.createClass({
     const {
       fields: { salesTax, lineItems, payments, storeDiscount },
       // redux-form provided helpers
-      error, handleSubmit, submitting, submitFailed
+      error, handleSubmit, submitting, submitFailed,
+      // other
+      sale
     } = this.props
 
     return <form onSubmit={handleSubmit}>
       <div>
-      </div>
-      <div>
+        <h2>Settings</h2>
         <input type="text" placeholder="salesTax" {...salesTax} />
         {salesTax.touched && salesTax.error && <span className="error">{salesTax.error}</span>}
       </div>
 
       <div>
+        <h2>Items</h2>
         <a href="#" onClick={this.addLineItem}>Add Item</a>
       </div>
       <div>
-        {lineItems.map((lineItem, i) => <LineItem key={i} {...lineItem} />)}
+        {lineItems.map((lineItem, i) => {
+           return <LineItem key={i} fields={lineItem} calculated={sale.lineItems[i]} />
+        })}
       </div>
 
       <div>
+        <h2>Payments</h2>
         <a href="#" onClick={this.addCheck}>Check</a><br />
         <a href="#" onClick={this.addCreditCard}>Credit Card</a><br />
         <a href="#" onClick={this.addCash}>Cash</a><br />
@@ -101,8 +111,12 @@ const AddSaleForm = React.createClass({
       </div>
 
       <div>
-        <input type="text" placeholder="storeDiscount" {...storeDiscount} />
-        {storeDiscount.touched && storeDiscount.error && <span className="error">{storeDiscount.error}</span>}
+        <h2>Totals</h2>
+        <p>Subtotal -- {sale.discountedTotal}</p>
+        <p>Taxes -- {sale.salesTaxAmount}</p>
+        <p>Total -- {sale.salesTaxTotal}</p>
+        <p>Payments -- {sale.paymentTotal}</p>
+        <p>Change -- {sale.change}</p>
       </div>
 
       <p>
@@ -114,8 +128,12 @@ const AddSaleForm = React.createClass({
   }
 })
 
+function mapStateToProps(state, props){
+  const sale = saleFromForm(props.values)
+  return {sale}
+}
+
 export default reduxForm({
   form: 'addItem',
   fields
-})(AddSaleForm)
-
+})(connect(mapStateToProps)(AddSaleForm))
