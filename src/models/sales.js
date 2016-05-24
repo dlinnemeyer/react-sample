@@ -1,27 +1,5 @@
 import {each, isFunction} from 'lodash'
 
-const Tax = ({inputPrice, taxablePrice,...abstractTax}) => run({
-  ...AbstractTax(abstractTax),
-  inputPrice,
-  taxablePrice,
-  amount:       ({taxablePrice, rate}) => taxablePrice* rate,
-  outputPrice:  ({inputPrice, amount}) => inputPrice + amount
-})
-
-const AbstractTax = ({rate, name}) => run({
-  // anything to do here?
-  name,
-  rate
-})
-
-const TaxSet = ({taxes, inputPrice}) => run({
-  inputPrice,
-  taxes:        ({inputPrice}) => calcTaxes(taxes, inputPrice),
-  outputPrice:  ({taxes}) => last(taxes).outputPrice,
-  amount:       ({inputPrice, outputPrice}) => outputPrice - inputPrice,
-  // in case we want it, the total rate of tax
-  rate:         ({inputPrice, amount}) => amount / inputPrice
-})
 
 function calcTaxes(taxes, input){
   const ret = []
