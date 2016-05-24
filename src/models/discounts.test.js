@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {Discount, AbstractDiscount, DiscountSet} from '../src/models/discounts'
+import {Discount, AbstractDiscount, DiscountSet} from './discounts'
 
 describe('Discounts', () => {
   describe('Discount', () => {
@@ -7,14 +7,14 @@ describe('Discounts', () => {
     it('should calculate a fixed discount', () => {
       assert.deepEqual({
         type: 'fixed',
-        value: 5,
+        value: 500,
         note: 'blah',
         isFixed: true,
         isPercent: false,
-        input: 13,
-        amount: 5,
-        output: 8
-      }, Discount({type: 'fixed', value: 5, note: 'blah', input: 13}))
+        input: 1300,
+        amount: 500,
+        output: 800
+      }, Discount()({type: 'fixed', value: 500, note: 'blah', input: 1300}))
     })
 
     it('should calculate a percentage discount', () => {
@@ -24,10 +24,10 @@ describe('Discounts', () => {
         note: 'blah',
         isFixed: false,
         isPercent: true,
-        input: 13,
-        amount: 1.3,
-        output: 11.7
-      }, Discount({type: 'percent', value: 10, note: 'blah', input: 13}))
+        input: 1300,
+        amount: 130,
+        output: 1170
+      }, Discount()({type: 'percent', value: 10, note: 'blah', input: 1300}))
     })
   })
 
@@ -40,7 +40,7 @@ describe('Discounts', () => {
         note: 'blah',
         isFixed: false,
         isPercent: true,
-      }, AbstractDiscount({type: 'percent', value: 10, note: 'blah'}))
+      }, AbstractDiscount()({type: 'percent', value: 10, note: 'blah'}))
     })
   })
 
@@ -48,25 +48,26 @@ describe('Discounts', () => {
 
     it('should handle a couple discounts', () => {
       assert.deepEqual({
-        input: 17,
+        input: 1700,
         discounts: [
           {type: 'percent', value: 10, note: 'blah', isFixed: false, isPercent: true,
-            input: 17, amount: 1.7, output: 15.3},
-          {type: 'fixed', value: 5, note: 'blah2', isFixed: true, isPercent: false,
-            input: 15.3, amount: 5, output: 10.3}
+            input: 1700, amount: 170, output: 1530},
+          {type: 'fixed', value: 500, note: 'blah2', isFixed: true, isPercent: false,
+            input: 1530, amount: 500, output: 1030}
         ],
-        amount: 6.7,
-        output: 10.3
+        amount: 670,
+        output: 1030
       },
-      DiscountSet({
+      DiscountSet()({
         discounts: [
           {type: 'percent', value: 10, note: 'blah'},
-          {type: 'fixed', value: 5, note: 'blah2'}
+          {type: 'fixed', value: 500, note: 'blah2'}
         ],
-        input: 17
+        input: 1700
       }))
     })
   })
 
 
 })
+
