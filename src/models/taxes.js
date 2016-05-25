@@ -1,34 +1,14 @@
-import {each, last} from 'lodash'
-import {run, listOf, Price} from '../lib/declarmath/base'
+import {last} from 'lodash'
+import {run, listOf, price, add, sub} from '../lib/declarmath/base'
 
-const _Tax = (config) => ({input, taxable, ...abstractTax}) => ({
-  ..._AbstractTax(config, abstractTax),
-  input,
-  taxable,
-  amount:       ({taxable, rate}) => Price(config, taxable * (rate / 100)),
-  output:       ({input, amount}) => input + amount
-})
-
-Tax({round: myRoundFunc})(....)
-
-const _Tax = ({price, sum}) => ({_AbstractTax}) => ({input, taxable, ...abstractTax}) => ({
+const _Tax = ({input, taxable = input, ...abstractTax}) => ({
   ..._AbstractTax(abstractTax),
   input,
   taxable,
-
-  amount:       price(({taxable, rate}) => taxable * (rate / 100)),
-  output:       price(sum('input', 'amount')),
+  // taxable:      isUndefined(taxable) ? input : taxable,
+  amount:       ({taxable, rate}) => price(taxable * (rate / 100)),
+  output:       price(add('input', 'amount'))
 })
-
-_Tax({roundTo5: false, roundTo1: true, blah: () ..})(...)
-
-function _Tax({input, taxable, ...abstractTax}){ return {
-  ...AbstractTax(this.config, abstractTax),
-  input,
-  taxable,
-  amount:       ({taxable, rate}) => this.round(taxable * (rate / 100)),
-  output:       ({input, amount}) => input + amount
-}}
 
 const _AbstractTax = ({rate, name}) => ({
   // anything to do here?
@@ -38,12 +18,13 @@ const _AbstractTax = ({rate, name}) => ({
 
 // return a tax tranform function that properly sets up input/output for each tax, but retains
 // the original input as the taxable price
-const taxTransform = input => prev => ({input: p ? p.output : input, taxable: input})
-const _TaxSet = ({taxes, input}) => ({
+const transform = (input, taxable) => prev => ({input: prev ? prev.output : input, taxable})
+const _TaxSet = ({taxes, input, taxable = input}) => ({
   input,
-  taxes:        ({input}) => listOf(_Tax)(transform(input))(taxes),
-  output:       ({taxes}) => last(taxes).output,
-  amount:       ({input, output}) => output - input,
+  taxable,
+  taxes:        listOf(_Tax)(transform(input, taxable))(taxes),
+  output:       ({taxes, input}) => taxes.length ? last(taxes).output : input,
+  amount:       price(sub('output', 'input')),
   // in case we want it, the total rate of tax
   rate:         ({input, amount}) => (amount / input) * 100
 })

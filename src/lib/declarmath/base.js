@@ -1,4 +1,4 @@
-import {reduce, isFunction, each, round, isObjectLike, isNumber, isArray, last} from 'lodash'
+import {reduce, isFunction, each, round, isObjectLike, isNumber, isArray, last, flow} from 'lodash'
 
 // helpers
 // todo: Its own file?
@@ -17,15 +17,18 @@ export const listOf = Model => pipe => list => {
   })
 }
 
-
-// take a function. return a function that first takes a postProcessing function and returns the
-// original function, wrapped in calculateObject. The postProcessing function is run on every
-// key returned by calculateObject.
-// TODO: we could memoize in this wrapper function? this objects are pure functions, so
-// func + postProcess + args should always give back the same answer
-export const run = func => {
-  return (postProcess = closest1) => (...args) => calculate(postProcess, func(...args))
+// just rounds the returned value to an integer. this enforces prices stored as cents, not as floats
+// price can take functions or values
+export const price = mixed => {
+  return isFunction(mixed) ? flow(mixed, closest1) : closest1(mixed)
 }
+
+// basic stuff. just works on objects. and I guess arrays? not sure that's a good idea though
+export const id = a => obj => obj[a]
+export const add = (a,b) => obj => obj[a] + obj[b]
+export const sub = (a,b) => obj => obj[a] - obj[b]
+export const mul = (a,b) => obj => obj[a] * obj[b]
+export const div = (a,b) => obj => obj[a] / obj[b]
 
 // rounding function builder. takes any increment, like '5' to round to nearest 5
 // for prevision rounding, just used lodash's rounding function
@@ -33,33 +36,40 @@ export const closest = inc => num => isNumber(num) ? round(num / inc) * inc : nu
 const closest1 = closest(1)
 const closest5 = closest(5)
 
+
+
+// wrap a function with calculate, so the user always gets fully calculated values
+// TODO: we could memoize in this wrapper function? this objects are pure functions, so
+// func + args should always give back the same answer
+export const run = func => flow(func, calculate)
+
+
 // dig through data recursively, find functions, and call them.
 // for each object, as keys are processed, pass them into functions so they can pull from
 // prior-calculated values
-const calculate = (postProcess, val, key, state = {}) => {
+const calculate = (val, state = {}) => {
   if(isArray(val)){
-    return collectionCalc(postProcess, val)
+    return collectionCalc(val)
   }
   if(isObjectLike(val)){
     // have to do a reduce here so we can track with the state as we process the object
     // we built a new state for the nested objects so they remain pure
-    return collectionCalc(postProcess, val)
+    return collectionCalc(val)
   }
   if(isFunction(val)){
     // run calculate on the result. this way if the function returns an object, we can
-    // resolve that object's functions, too. it also leaves postProcess running to re-running
-    // calculate
-    return calculate(postProcess, val(state), key, state)
+    // resolve that object's functions, too.
+    return calculate(val(state), state)
   }
 
-  // scalar values remaing, so we can run postprocess on those
-  return postProcess(val, key, state)
+  // scalar values remaining, so just return them
+  return val
 }
 
-const collectionCalc = (postProcess, coll) => {
+const collectionCalc = (coll) => {
   const initial = isArray(coll) ? [] : {}
   return reduce(coll, (state, val, key) => {
-    state[key] = calculate(postProcess, val, key, state)
+    state[key] = calculate(val, state)
     return state
   }, initial)
 }

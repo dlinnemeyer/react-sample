@@ -14,7 +14,7 @@ describe('Discounts', () => {
         input: 1300,
         amount: 500,
         output: 800
-      }, Discount()({type: 'fixed', value: 500, note: 'blah', input: 1300}))
+      }, Discount({type: 'fixed', value: 500, note: 'blah', input: 1300}))
     })
 
     it('should calculate a percentage discount', () => {
@@ -27,7 +27,20 @@ describe('Discounts', () => {
         input: 1300,
         amount: 130,
         output: 1170
-      }, Discount()({type: 'percent', value: 10, note: 'blah', input: 1300}))
+      }, Discount({type: 'percent', value: 10, note: 'blah', input: 1300}))
+    })
+
+    it('should properly round fractions of pennies', () => {
+      assert.deepEqual(Discount({type: 'percent', value: 8.5, note: 'blah2', input: 353}),{
+        type: 'percent',
+        value: 8.5,
+        note: 'blah2',
+        isFixed: false,
+        isPercent: true,
+        input: 353,
+        amount: 30,
+        output: 323
+      })
     })
   })
 
@@ -40,11 +53,20 @@ describe('Discounts', () => {
         note: 'blah',
         isFixed: false,
         isPercent: true,
-      }, AbstractDiscount()({type: 'percent', value: 10, note: 'blah'}))
+      }, AbstractDiscount({type: 'percent', value: 10, note: 'blah'}))
     })
   })
 
   describe('DiscountSet', () => {
+
+    it('should handle an empty discount list', () => {
+      assert.deepEqual(DiscountSet({discounts: [], input: 1250}), {
+        input: 1250,
+        discounts: [],
+        amount: 0,
+        output: 1250
+      })
+    })
 
     it('should handle a couple discounts', () => {
       assert.deepEqual({
@@ -58,7 +80,7 @@ describe('Discounts', () => {
         amount: 670,
         output: 1030
       },
-      DiscountSet()({
+      DiscountSet({
         discounts: [
           {type: 'percent', value: 10, note: 'blah'},
           {type: 'fixed', value: 500, note: 'blah2'}
