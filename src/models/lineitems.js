@@ -1,4 +1,5 @@
-import {run, price} from '../lib/declarmath/base'
+import {sumBy} from 'lodash'
+import {run, price, listOf} from '../lib/declarmath/base'
 import {TaxSet} from './taxes'
 import {DiscountSet} from './discounts'
 
@@ -43,4 +44,13 @@ const _LineItem = ({listPrice = 0, customerSurcharge = 0, discounts = [], taxes 
   netStorePortion:        o => o.grossStorePortion
 })
 
+const _LineItemSet = ({lineItems}) => ({
+  lineItems:          listOf(_LineItem)()(lineItems),
+  discountAmount:     o => sumBy(o.lineItems, 'discountAmount'),
+  discountedTotal:    o => sumBy(o.lineItems, 'discountedPrice'),
+  taxAmount:          o => sumBy(o.lineItems, 'taxAmount'),
+  taxedTotal:         o => sumBy(o.lineItems, 'taxedPrice'),
+})
+
 export const LineItem = run(_LineItem)
+export const LineItemSet = run(_LineItemSet)
