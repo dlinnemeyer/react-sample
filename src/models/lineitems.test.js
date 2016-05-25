@@ -1,5 +1,5 @@
 import {assert} from 'chai'
-import {LineItem} from './lineitems'
+import {LineItem, LineItemSet} from './lineitems'
 import {DiscountSet} from './discounts'
 import {TaxSet} from './taxes'
 
@@ -75,6 +75,33 @@ describe('LineItems', () => {
         netStorePortion: 115
       })
 
+    })
+  })
+
+  describe('LineItemSet', () => {
+
+    it('should handle an empty lineitem list', () => {
+      assert.deepEqual(LineItemSet({lineItems: []}), {
+        lineItems: [],
+        discountAmount: 0,
+        discountedTotal: 0,
+        taxAmount: 0,
+        taxedTotal: 0
+      })
+    })
+
+    it('should handle a couple lineitems', () => {
+      const rawLineItems = [
+        {listPrice: 500, discounts: [{type: 'fixed', value: 200}], taxes: [{rate: 5.5}]},
+        {listPrice: 1000, discounts: [{type: 'percent', value: 50}], taxes: [{rate: 10}]},
+      ]
+      assert.deepEqual(LineItemSet({lineItems: rawLineItems}),{
+        lineItems: rawLineItems.map(LineItem),
+        discountAmount: 700,
+        discountedTotal: 800,
+        taxAmount: 67,
+        taxedTotal: 867
+      })
     })
   })
 })

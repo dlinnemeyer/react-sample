@@ -1,8 +1,11 @@
+/* @flow */
 import {sumBy} from 'lodash'
 import {run, price, listOf} from '../lib/declarmath/base'
 import {TaxSet} from './taxes'
 import {DiscountSet} from './discounts'
 
+// TODO: consider breaking this into smaller functions that we just merge together in a parent
+// function? easier to test and reason about that way
 const _LineItem = ({listPrice = 0, customerSurcharge = 0, discounts = [], taxes = [], percentSplit = 0, consignorSurcharge = 0, ...meta}) => ({
   ...meta, //title, description, silly stuff like that
 
@@ -45,7 +48,7 @@ const _LineItem = ({listPrice = 0, customerSurcharge = 0, discounts = [], taxes 
 })
 
 const _LineItemSet = ({lineItems}) => ({
-  lineItems:          listOf(_LineItem)()(lineItems),
+  lineItems:          lineItems.map(_LineItem),
   discountAmount:     o => sumBy(o.lineItems, 'discountAmount'),
   discountedTotal:    o => sumBy(o.lineItems, 'discountedPrice'),
   taxAmount:          o => sumBy(o.lineItems, 'taxAmount'),
